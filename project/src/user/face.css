@@ -1,0 +1,28 @@
+.mirror {
+  transform: scaleX(-1);
+}
+
+.video-container {
+  position: relative;
+  width: auto; /* Adjust based on your needs */
+  height: auto; /* Adjust based on your needs */
+}
+
+.face-overlay {
+  border: 2px solid red; /* Customizable based on your preference */
+}
+
+.overlay {
+  position: absolute;
+  bottom: 0;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  padding: 10px;
+}
+
+.face-frame {
+  position: absolute;
+  border: 2px solid green;
+  /* Additional styles if needed */
+}
