@@ -1,28 +1,50 @@
-.mirror {
-  transform: scaleX(-1);
+.container {
+  width: 100%;
+  display: block;
+  justify-content: center; /* Center the content horizontally */
+  align-items: center; /* Center the content vertically (if needed) */
 }
 
 .video-container {
   position: relative;
-  width: auto; /* Adjust based on your needs */
-  height: auto; /* Adjust based on your needs */
+  width: 60%; /* Adjust based on your preference */
+  padding-bottom: 33.75%; /* Adjust for 16:9 aspect ratio, reduce percentage for larger vertical space */
+  margin: auto; /* Center the container */
 }
 
-.face-overlay {
-  border: 2px solid red; /* Customizable based on your preference */
-}
-
-.overlay {
+img {
   position: absolute;
-  bottom: 0;
-  color: white;
-  background: rgba(0, 0, 0, 0.5);
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 10px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
-.face-frame {
-  position: absolute;
-  border: 2px solid green;
-  /* Additional styles if needed */
+.overlay-box {
+  margin: 0 auto;
+  margin-top: 1rem;
+  width: 60%; 
+  height: 4rem; 
+  border: 0.5px solid #080808;
+  border-radius: 10px;
+  background-color: aqua; 
+  justify-content: center; 
+  align-items: center;
+  color: #080808;
+}
+
+
+@media screen and (max-width: 800px) {
+
+  .video-container {
+    width: 80%; /* Adjust for smaller screens */
+    padding-bottom: 45%; /* Adjust the aspect ratio padding for smaller screens */
+  }
+
+  .overlay-box {
+    width: 80%; 
+    height: 3rem;
+  }
 }
