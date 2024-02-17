@@ -1,0 +1,10 @@
+.head-wrap{
+    display: flex;
+    justify-content: space-between;
+}
+.head-end{
+    display: flex;
+}
+.head-search{
+    padding-right: 1rem;
+}

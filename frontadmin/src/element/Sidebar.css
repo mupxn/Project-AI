@@ -1,0 +1,142 @@
+body{
+    font-family: sans-serif;
+}
+.sidebar{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    width: 20%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    overflow-x: hidden;
+    background-color: #ffff;
+    padding-top: 1rem;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+}
+.sidebar-header{
+    color: black;
+    padding-left: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    border-bottom: 1px solid rgb(182, 181, 181);
+    display: flex;
+}
+.headericon-wrap{
+    width: 30%;
+}
+.header-admin{
+    margin-top: 1.5rem;
+    font-size: 1.5rem;
+}
+.sidebar-menu{
+    flex-grow: 1;
+}
+.menu-wrap{
+    margin: 0.5rem 0.5rem;
+    border-radius: 0.3rem;
+}
+a{
+    text-decoration: none;
+    color: black;
+    transition: 0.3s;
+    padding: 1rem 0.5rem;
+    display: flex;
+    font-size: 1rem;
+}
+.menu-wrap:hover {
+    background-color: #0d6efd;
+    border-radius: 0.3rem;
+}
+.menu-wrap:hover a {
+    color: #fff;
+    transition: 0s;
+}
+.menu-wrap:hover .icon-wrap svg {
+    fill: #fff; 
+    transition: 0s;
+}
+.icon-wrap{
+    width: 11%;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+.sidebar-foot{
+    padding: 0.6rem;
+    margin: 0 1rem 3rem 1rem;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    font-size: 1rem;
+    border-radius: 0.3rem;
+    background-color: #fff;
+    border: none;
+    cursor: pointer;
+}
+.sidebar-foot:hover{
+    background-color: rgb(252, 72, 72);
+    color: #fff;
+    fill: #fff;
+    transition: 0s;
+}
+
+.footicon-wrap{
+    width: 12%;
+    margin: 0 0.4rem 0 0;
+}
+.active {
+    border-radius: 0.3rem;
+    color: #4CAF50;
+    fill: #4CAF50;
+}
+@media screen and (max-width: 600px) {
+    .sidebar{
+        width: 4rem;
+        height: 100%;
+    }
+    .sidebar-header{
+        margin: 0 0.7rem 0rem 0.7rem;
+        padding: 0 0 0.5rem 0;
+        border-bottom: 1px solid rgb(182, 181, 181);
+    }
+    a{
+        padding: 0.1rem 0 0 0;
+        margin-top: 1rem;
+        border-radius: 0.3rem;
+    }
+    a :hover{
+        background-color: #0d6efd;
+    }
+    .menu-wrap{
+        margin: 0 0.5rem 0 0.5rem;
+        padding: 0;
+    }
+    .header-admin{
+        display: none;
+    }
+    .foot-logout{
+        display: none;
+    }
+    .sidebar-foot{
+        padding: 0.1rem 0 0 0;
+        margin-top: 1rem;
+        border-radius: 0.3rem;
+    }
+    .footicon-wrap{
+        margin: 0 0.5rem 0 0.5rem;
+        padding: 0.1rem 0 0 0;
+        width: 100%;
+    }
+    .headericon-wrap{
+        width: 100%;
+    }
+    .icon-wrap{
+        width: 100%;
+    }
+    .menu-link{
+        display: none;
+    }
+}

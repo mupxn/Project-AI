@@ -1,0 +1,36 @@
+body{
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: #dddddd;
+}
+.container{
+  display: flex;
+}
+.sidebarContainer {
+  height: 100%;
+}
+.page {
+  position: relative;
+  background-color: blueviolet;
+  height: 100%;
+  width: 76%;
+  left: 20%;
+  padding: 1rem 1rem ;
+  overflow-y: hidden;
+}
+
+@media screen and (max-width: 600px){
+  .sidebarContainer {
+    height: 100%;
+  }
+  .page{
+    width: 82%;
+    position: relative;
+    left: 4rem;
+    height: 100%;
+    padding: 0.5rem 0.5rem ;
+  }
+}
+
+
