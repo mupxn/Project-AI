@@ -7,7 +7,8 @@
 
 .video-container {
   position: relative;
-  width: 60%; /* Adjust based on your preference */
+  width: 50%; /* Adjust based on your preference */
+  height: 50%;
   padding-bottom: 33.75%; /* Adjust for 16:9 aspect ratio, reduce percentage for larger vertical space */
   margin: auto; /* Center the container */
 }
@@ -25,7 +26,7 @@ img {
 .overlay-box {
   margin: 0 auto;
   margin-top: 1rem;
-  width: 60%; 
+  width: 50%; 
   height: 4rem; 
   border: 0.5px solid #080808;
   border-radius: 10px;
