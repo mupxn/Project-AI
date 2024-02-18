@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState } from 'react';
 import './UserPage.css'
+import '../data.json'
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) {
     return null;
@@ -27,7 +28,7 @@ function UserPage() {
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
-  
+
   // Function to handle the search action (e.g., when the user submits the form)
   const handleSearchSubmit = (e) => {
     e.preventDefault(); // Prevent the form from refreshing the page
@@ -35,31 +36,49 @@ function UserPage() {
   };
 
   return (
-    <div className='head-wrap'>
-      <div className='head-info'>
-        Infomation User
-      </div>
-      <div className="head-end">
-        <div className="head-search">
-          <form onSubmit={handleSearchSubmit}>
-            <input 
-              type="text" 
-              placeholder="Search users..." 
-              value={searchQuery} 
-              onChange={handleSearchChange}
-            />
-            <button type="submit">Search</button>
-          </form>
+    <div className='user'>
+      <div className='head-wrap'>
+        <div className='head-info'>
+          Infomation User
         </div>
-        <div className="head-adduser">
-          <button type="button" className="btn-add-user" onClick={openModal}>Add User</button>
+        <div className="head-end">
+          <div className="head-search">
+            <form onSubmit={handleSearchSubmit}>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              <button type="submit">Search</button>
+            </form>
+          </div>
+          <div className="head-adduser">
+            <button type="button" className="btn-add-user" onClick={openModal}>Add User</button>
+          </div>
+        </div>
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
+          <h2>Add New User</h2>
+          {/* Form fields for adding a user can be placed here */}
+        </Modal>
+      </div>
+
+      <div className="table-wrap">
+        <div className="table-head">
+          <div className="tr">
+            <div className="th">ID</div>
+            <div className="th">ชื่อ-นามสกุล</div>
+            <div className="th">เพศ</div>
+            <div className="th">อายุ</div>
+          </div>
+        </div>
+        <div className="table-body">
+          
         </div>
       </div>
-      <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <h2>Add New User</h2>
-        {/* Form fields for adding a user can be placed here */}
-      </Modal>
-    </div>
+      
+
+    </div >
   )
 }
 
