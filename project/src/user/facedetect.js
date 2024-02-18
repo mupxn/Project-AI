@@ -7,7 +7,11 @@ const FaceDetect = () => {
       <div className="video-container">
         <img src="http://localhost:5000/video_feed" alt="Video Stream" style={{ borderRadius: '10px' }} />
       </div>
-      <div className="overlay-box">Some content here...</div>
+      <div className="overlay-box">
+        <div className='photo'>
+          <img src=''/>
+        </div>
+      </div>
     </div>
   );
 };

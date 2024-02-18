@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 31, 2024 at 01:05 PM
+-- Generation Time: Feb 17, 2024 at 09:36 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -49,10 +49,8 @@ CREATE TABLE `detection` (
   `DetectID` int(11) NOT NULL,
   `Date` date NOT NULL,
   `Time` time NOT NULL,
-  `Age` int(3) NOT NULL,
   `UserID` int(11) NOT NULL,
   `TextID` int(11) NOT NULL,
-  `Gender` int(11) NOT NULL,
   `BgDetect` text NOT NULL,
   `FaceDetect` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -113,16 +111,18 @@ INSERT INTO `emotionaltext` (`TextID`, `Text`, `EmoID`) VALUES
 CREATE TABLE `user` (
   `UserID` int(10) NOT NULL,
   `Name` varchar(250) NOT NULL,
-  `FaceIMG` text NOT NULL
+  `FaceIMG` text NOT NULL,
+  `Gender` varchar(10) NOT NULL,
+  `BirthDay` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`UserID`, `Name`, `FaceIMG`) VALUES
-(1, 'noey', 'D:\\Project-AI\\backen\\data_set\\user\\001'),
-(2, 'praew', 'D:\\Project-AI\\backen\\data_set\\user\\002');
+INSERT INTO `user` (`UserID`, `Name`, `FaceIMG`, `Gender`, `BirthDay`) VALUES
+(1, 'noey', 'D:\\Project-AI\\backen\\data_set\\user\\noey', 'Female', '2001-09-01'),
+(2, 'praew', 'D:\\Project-AI\\backen\\data_set\\user\\2', 'Female', '2003-01-30');
 
 --
 -- Indexes for dumped tables
