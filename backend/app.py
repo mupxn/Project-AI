@@ -16,7 +16,7 @@ if not camera.isOpened():
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Specify the database path
-db_path = db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
 IMAGES_DIR = 'D:/Project-AI/backend/data_set/detection/face'
 
 def gen_frames():  # generate frame by frame from camera
