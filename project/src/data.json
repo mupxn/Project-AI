@@ -23,7 +23,7 @@
         "Date": "01/01/2025",
         "Time": "12:00",
         "BgDetect": "/dataset/detect",
-        "FaceDetect": "backen/data_set/detection/face/001_01-01-2025_12-00.jpg",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
         "UserID":"001",
         "TextID": "001"
     },{
@@ -31,7 +31,7 @@
         "Date": "01/01/2025",
         "Time": "12:00",
         "BgDetect": "/dataset/detect",
-        "FaceDetect": "backen/data_set/detection/face/002_01-01-2025_12-00.jpg",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
         "UserID":"002",
         "TextID": "001"
     },{
@@ -39,7 +39,7 @@
         "Date": "01/01/2025",
         "Time": "12:01",
         "BgDetect": "/dataset/detect",
-        "FaceDetect": "backen/data_set/detection/face/002_01-01-2025_12-01.jpg",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
         "UserID":"002",
         "TextID": "001"
     }],

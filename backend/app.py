@@ -1,4 +1,5 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, send_from_directory
+import os
 import cv2
 from deepface import DeepFace
 import os
@@ -15,7 +16,8 @@ if not camera.isOpened():
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Specify the database path
-db_path = "backen/data_set/user"
+db_path = "backend/data_set/user"
+IMAGES_DIR = 'D:/Project-AI/backend/data_set/detection/face'
 
 def gen_frames():  # generate frame by frame from camera
     while True:
@@ -74,6 +76,11 @@ def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/FaceImg/<path:filename>')
+def serve_image(filename):
+    """Serve an image from the IMAGES_DIR directory."""
+    return send_from_directory(IMAGES_DIR, filename)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

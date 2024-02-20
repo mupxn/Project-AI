@@ -6,7 +6,7 @@ const FaceDetect = () => {
   return (
     <div className="container">
       <div className="video-container">
-        <img src="http://localhost:5000/video_feed" alt="Video Stream" style={{ borderRadius: '10px' }} />
+        <img src="http://localhost:5000/video_feed"style={{ borderRadius: '10px' }} className='img' />
       </div>
       <ResultBox/>
     </div>
