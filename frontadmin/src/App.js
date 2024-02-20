@@ -5,11 +5,12 @@ import HomePage from "./page/HomePage"
 import UserPage from "./page/UserPage"
 import SearchPage from './page/SearchPage';
 import Sidebar from './element/Sidebar';
+import ModalDeleteUser from './element/ModalDeleteUser';
 function App() {
   return (
     <div className="App">
       <div className='container'>
-        <div className='sidebarContainer'><Sidebar/></div>
+        <div className='sidebarContainer'><Sidebar /></div>
         <div className='page'>
           <Routes>
             <Route path="/" element={<HomePage />}/>
@@ -21,5 +22,5 @@ function App() {
     </div>
   );
 }
-
+// icementos
 export default App;

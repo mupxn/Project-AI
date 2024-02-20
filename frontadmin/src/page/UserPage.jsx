@@ -1,30 +1,29 @@
 import React from 'react'
 import { useState } from 'react';
 import './UserPage.css'
-import '../data.json'
-const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) {
-    return null;
-  }
-
-  return (
-    <div className="modal-backdrop">
-      <div className="modal-content">
-        {children}
-        <button onClick={onClose}>Close</button>
-      </div>
-    </div>
-  );
-};
+import data from '../data.json'
+import ModalDeleteUser from '../element/ModalDeleteUser';
+import ModalAddUser from '../element/ModalAddUser';
+const users = data.User
 
 function UserPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-  // State to hold the search query
-  const [searchQuery, setSearchQuery] = useState('');
+  //modal add user
+  const [isModalAddUser, setIsModalAddUser] = useState(false);
+  //modal delete
+  const [isModalDeleteUser, setIsModalDeleteUser] = useState(false)
+  //edit state
+  const [isEditUser, setIsEditUser] = useState(false)
 
-  // Function to handle the change in the input field
+  const openModalEditUser = () => setIsEditUser(true)
+  const clostModalEditUser = () => setIsEditUser(false)
+
+  const openModalDelelteUser = () => setIsModalDeleteUser(true);
+  const closeModalDelelteUser = () => setIsModalDeleteUser(false);
+
+  const openModalAddUser = () => setIsModalAddUser(true);
+  const closeModalAddUser = () => setIsModalAddUser(false);
+
+  const [searchQuery, setSearchQuery] = useState('');
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -54,30 +53,50 @@ function UserPage() {
             </form>
           </div>
           <div className="head-adduser">
-            <button type="button" className="btn-add-user" onClick={openModal}>Add User</button>
+            <button type="button" className="btn-add-user" onClick={openModalAddUser}>Add User</button>
           </div>
         </div>
-        <Modal isOpen={isModalOpen} onClose={closeModal}>
-          <h2>Add New User</h2>
-          {/* Form fields for adding a user can be placed here */}
-        </Modal>
+
       </div>
 
       <div className="table-wrap">
         <div className="table-head">
           <div className="tr">
-            <div className="th">ID</div>
-            <div className="th">ชื่อ-นามสกุล</div>
-            <div className="th">เพศ</div>
-            <div className="th">อายุ</div>
+            <div className="th id">ID</div>
+            <div className="th name">ชื่อ-นามสกุล</div>
+            <div className="th gender">เพศ</div>
+            <div className="th age">อายุ</div>
+            <div className="th edit">แก้ไข</div>
+            <div className="th delete">ลบ</div>
           </div>
         </div>
         <div className="table-body">
-          
+          {users.map(user => (
+            <div className='tr' key={user.UserID}>
+              <div className="td id">{user.UserID}</div>
+              <div className="td name">{user.Name}</div>
+              <div className="td gender">{user.Gender}</div>
+              <div className="td age">{user.Age}</div>
+              <div className="td edit">
+                <button className="edit-user" onClick={openModalEditUser}>แก้ไข</button>
+              </div>
+              <div className="td delete">
+                <button className="delete-user" onClick={openModalDelelteUser}>ลบ</button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-      
 
+      jgvthfhdfhdfutdfjftutfjtfjt
+      {isModalDeleteUser && (
+        <ModalDeleteUser isOpen={isModalDeleteUser} onClose={closeModalDelelteUser}/>
+      )}
+
+      <ModalAddUser isOpen={isModalAddUser} onClose={closeModalAddUser}>
+        <h2>Add New User</h2>
+        {/* Form fields for adding a user can be placed here */}
+      </ModalAddUser>
     </div >
   )
 }

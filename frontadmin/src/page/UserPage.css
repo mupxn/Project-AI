@@ -11,19 +11,43 @@
 }
 .table-wrap{
     width: 100%;
+    /* overflow: hidden; */
     /* background-color: white; */
 }
 .table-head{
     border-radius: 0.5rem 0.5rem 0 0;
-    background-color: rgb(184, 116, 116);
+    background-color: #ddd;
+}
+.th{
+    width: 10%;
+    text-align: center;
+    /* background-color: rgb(224, 129, 39); */
 }
 .tr{
-    border: 1px solid;
     padding: 0.5rem;
     display: flex;
     justify-content: space-around;
 }
-.th{
-    
-    border: 1px solid;
+.table-body{
+    background-color: rgb(255, 255, 255);
+}
+.td{
+    width: 10%;
+    /* overflow: hidden; */
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+    /* background-color: aqua; */
+}
+.icon-wrap{
+    width: 20%;
+}
+
+.user{
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+button{
+    cursor: pointer;
 }

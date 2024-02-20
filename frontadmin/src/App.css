@@ -2,7 +2,7 @@ body{
   margin: 0;
   padding: 0;
   border: 0;
-  background-color: #dddddd;
+  background-color: #eee;
 }
 .container{
   display: flex;
@@ -11,13 +11,16 @@ body{
   height: 100%;
 }
 .page {
-  position: relative;
+  /* position: relative; */
   /* background-color: blueviolet; */
   height: 100%;
-  width: 76%;
-  left: 20%;
-  padding: 1rem 1rem ;
-  overflow-y: hidden;
+  position: fixed;
+  left: 200px;
+  width: calc(100% - 200px);
+  overflow-y: auto;
+  /* left: 12rem;
+  padding: 1rem 1rem ; */
+  /* overflow-y: hidden; */
 }
 
 @media screen and (max-width: 600px){
@@ -25,11 +28,14 @@ body{
     height: 100%;
   }
   .page{
-    width: 82%;
-    position: relative;
-    left: 4rem;
+    /* width: 82%; */
+    /* position: relative; */
+    position: fixed;
+    width: calc(100% - 56px);
+    left: 56px;
+    /* left: 3.5rem; */
     height: 100%;
-    padding: 0.5rem 0.5rem ;
+    /* padding: 0.5rem 0.5rem ; */
   }
 }
 
