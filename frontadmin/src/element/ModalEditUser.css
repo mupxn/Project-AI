@@ -1,4 +1,4 @@
-.modal-container{
+.modal-container-edit{
     position: fixed;
     left: 200px;
     top: 0;
@@ -9,13 +9,16 @@
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
 }
-.modal{
+/* .user-info{
+    display: flex;
+    justify-content: center;
+} */
+.modal-edit{
     background-color: white;
     border-radius: 0.5rem;
     text-align: center;
     padding: 2rem;
     width: 300px;
-    /* transform: translate(-50%,0%); */
 }
 .btn{
     border: none;
@@ -24,7 +27,6 @@
     border-radius: 0.5rem;
     box-shadow: 0px 5px 5px #ccc;
     cursor: pointer;
-    /* justify-content: space-between; */
 }
 .btn-submit{
     background-color: #42a942;
@@ -32,10 +34,20 @@
 .btn-cancel{
     background-color: #d9534f;
 }
-.modal-content{
-    margin-bottom: 2rem;
+.section-edit{
+    padding-right: 10px;
 }
-.modal-footer{
+.modal-content-edit{
+    /* background-color: #d9534f; */
+    margin-bottom: 2rem;
+    /* display: block; */
+}
+.user-info-edit{
+    display: flex;
+    justify-content: center;
+    margin: 15px;
+}
+.modal-footer-edit{
     display: flex;
     justify-content: space-evenly;
 }

@@ -3,15 +3,12 @@ import "./ModalAddUser.css"
 import data from '../data.json'
 
 const users = data.User
-function ModalAddUser({ isOpen, onClose }) {
+function ModalAddUser({ onClose }) {
     const [maxDate, setMaxDate] = useState('');
     useEffect(() => {
         const today = new Date().toISOString().split('T')[0];
         setMaxDate(today);
       }, []);
-    if (!isOpen) {
-        return null;
-    }
     return (
         <div className='modal-container'>
             <div className="modal">
@@ -42,15 +39,9 @@ function ModalAddUser({ isOpen, onClose }) {
                         <div className="modal-footer">
                             <input type="submit" className='btn btn-submit' value="Submit"/>
                             <button className='btn btn-cancel' onClick={onClose}>Cancel</button>
-                            {/* <button className='btn btn-submit' onClick={onClose}>Submit</button>
-                            <button className='btn btn-cancel' onClick={onClose}>Cancel</button> */}
                         </div>
                     </form>
                 </div>
-                {/* <div className="modal-footer">
-                    <button className='btn btn-submit' onClick={onClose}>Submit</button>
-                    <button className='btn btn-cancel' onClick={onClose}>Cancel</button>
-                </div> */}
             </div>
         </div>
     )

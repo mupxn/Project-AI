@@ -1,23 +1,33 @@
-import React from 'react'
+import React, { Children, useEffect } from 'react'
 import { useState } from 'react';
 import './UserPage.css'
 import data from '../data.json'
 import ModalDeleteUser from '../element/ModalDeleteUser';
 import ModalAddUser from '../element/ModalAddUser';
+import ModalEditUser from '../element/ModalEditUser';
+import img from "../img/testimg.jpeg"
 const users = data.User
-
+const itemsPerPage = 5;
+// pagination / edit image /crop image
 function UserPage() {
+  const [selected,setSelected] = useState(null)
   //modal add user
   const [isModalAddUser, setIsModalAddUser] = useState(false);
   //modal delete
   const [isModalDeleteUser, setIsModalDeleteUser] = useState(false)
   //edit state
-  const [isEditUser, setIsEditUser] = useState(false)
+  const [isModalEditUser, setIsModalEditUser] = useState(false)
 
-  const openModalEditUser = () => setIsEditUser(true)
-  const clostModalEditUser = () => setIsEditUser(false)
+  const openModalEditUser = (userID) => {
+    setIsModalEditUser(true)
+    setSelected(userID)
+  }
+  const closeModalEditUser = () => setIsModalEditUser(false)
 
-  const openModalDelelteUser = () => setIsModalDeleteUser(true);
+  const openModalDelelteUser = (userID) => {
+    setIsModalDeleteUser(true);
+    setSelected(userID)
+  }
   const closeModalDelelteUser = () => setIsModalDeleteUser(false);
 
   const openModalAddUser = () => setIsModalAddUser(true);
@@ -28,12 +38,16 @@ function UserPage() {
     setSearchQuery(e.target.value);
   };
 
-  // Function to handle the search action (e.g., when the user submits the form)
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); // Prevent the form from refreshing the page
-    console.log('Searching for:', searchQuery); // For demonstration, you might make an API call here
+    e.preventDefault();
+    console.log('Searching for:', searchQuery);
   };
 
+  const [ posts,setPosts ] = useState([])
+  const [ loading,setLoading ] = useState(false)
+  const [ currentPage, setCurrentPage ] = useState(1)
+  const [ postsPerPage, setPostsPerPage ] = useState(10)
+  
   return (
     <div className='user'>
       <div className='head-wrap'>
@@ -63,6 +77,7 @@ function UserPage() {
         <div className="table-head">
           <div className="tr">
             <div className="th id">ID</div>
+            <div className="th profile">profile</div>
             <div className="th name">ชื่อ-นามสกุล</div>
             <div className="th gender">เพศ</div>
             <div className="th age">อายุ</div>
@@ -74,29 +89,32 @@ function UserPage() {
           {users.map(user => (
             <div className='tr' key={user.UserID}>
               <div className="td id">{user.UserID}</div>
+              <div className="td profile" ><img src={img} style={{width:"40px",height:"40px"}}/></div>
               <div className="td name">{user.Name}</div>
               <div className="td gender">{user.Gender}</div>
               <div className="td age">{user.Age}</div>
               <div className="td edit">
-                <button className="edit-user" onClick={openModalEditUser}>แก้ไข</button>
+                <button className="edit-user" onClick={() => openModalEditUser(user.UserID)}>แก้ไข</button>
               </div>
               <div className="td delete">
-                <button className="delete-user" onClick={openModalDelelteUser}>ลบ</button>
+                <button className="delete-user" onClick={() => openModalDelelteUser(user.UserID)}>ลบ</button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      jgvthfhdfhdfutdfjftutfjtfjt
       {isModalDeleteUser && (
-        <ModalDeleteUser isOpen={isModalDeleteUser} onClose={closeModalDelelteUser}/>
+        <ModalDeleteUser onClose={closeModalDelelteUser} userId={selected}/>
       )}
 
-      <ModalAddUser isOpen={isModalAddUser} onClose={closeModalAddUser}>
-        <h2>Add New User</h2>
-        {/* Form fields for adding a user can be placed here */}
-      </ModalAddUser>
+      {isModalAddUser && (
+        <ModalAddUser onClose={closeModalAddUser}/>
+      )}
+
+      {isModalEditUser && (
+        <ModalEditUser onClose={closeModalEditUser} userId={selected}/>
+      )}
     </div >
   )
 }

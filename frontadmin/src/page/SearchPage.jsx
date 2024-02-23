@@ -1,17 +1,113 @@
-import React from 'react'
-
+import React, { useState,useEffect } from 'react'
+import ModalChooseImg from '../element/ModalChooseImg';
+import "./SearchPage.css"
+import data from '../data.json'
+import img from "../img/testimg.jpeg"
+const users = data.User
 function SearchPage() {
+  // const [file, setFile] = useState(null);
+  // const [previewUrl, setPreviewUrl] = useState(null);
+  const [isModalChooseImg , setIsModalChooseImg] = useState(false)
+  const openModalChooseImg =()=> setIsModalChooseImg(true)
+  const closeModalChooseImg =()=> setIsModalChooseImg(false)
+  // useEffect(() => {
+  //   if (!file) {
+  //     setPreviewUrl(null);
+  //     return;
+  //   }
+  //   const objectUrl = URL.createObjectURL(file);
+  //   setPreviewUrl(objectUrl);
+
+  //   return () => URL.revokeObjectURL(objectUrl);
+  // }, [file]);
+
+  // function handleFileChange(event) {
+  //   const file = event.target.files[0];
+  //   if (!file) {
+  //     return;
+  //   }
+  //   setFile(file);
+  // }
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    console.log('Searching for:', searchQuery);
+  };
+
   return (
-    <div className='SearchPage'>
-      <div className="head-wrap">
-        
+    <div className='search'>
+      <div className="head-search-wrap">
+        <div className="head-search-info">Search&History</div>
+        <div className="head-search-end">
+          <div className="head-search-fromname">
+            <form onSubmit={handleSearchSubmit}>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              <button type="submit">Search</button>
+            </form>
+          </div>
+          <div className="head-search-fromimg">
+            <button onClick={openModalChooseImg}>search from img</button>
+            {/* <input type="file" onChange={handleFileChange} accept="image/png, image/jpeg"/>
+            {previewUrl && <img src={previewUrl} alt="Preview" style={{width: '100px', height: '100px'}} />} */}
+          </div>
+        </div>
       </div>
+      <div className="filter-wrap-search">
+        <div className="filter-search">
+          <form>
+            <select>
+              <option>daily</option>
+              <option>monthly</option>
+              <option>yearly</option>
+            </select>
+          </form>
+        </div>
+      </div>
+
       <div className="table-wrap">
-
+        <div className="table-head">
+          <div className="tr">
+            <div className="th id">ID</div>
+            <div className="th profile">profile</div>
+            <div className="th name">ชื่อ-นามสกุล</div>
+            <div className="th gender">เพศ</div>
+            <div className="th age">อายุ</div>
+            <div className="th edit">แก้ไข</div>
+            <div className="th delete">ลบ</div>
+          </div>
+        </div>
+        <div className="table-body">
+          {users.map(user => (
+            <div className='tr' key={user.UserID}>
+              <div className="td id">{user.UserID}</div>
+              <div className="td profile" ><img src={img} style={{width:"40px",height:"40px"}}/></div>
+              <div className="td name">{user.Name}</div>
+              <div className="td gender">{user.Gender}</div>
+              <div className="td age">{user.Age}</div>
+              <div className="td edit">
+                <button className="edit-user" >แก้ไข</button>
+              </div>
+              <div className="td delete">
+                <button className="delete-user" >ลบ</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-      Search&History
 
 
+      {isModalChooseImg && (
+        <ModalChooseImg onclose={closeModalChooseImg}/>
+      )}
     </div>
   )
 }

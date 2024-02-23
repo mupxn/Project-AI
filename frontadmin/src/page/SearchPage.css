@@ -1,0 +1,19 @@
+.search{
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+.head-search-wrap{
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+}
+.head-search-end{
+    display: flex;
+}
+.head-search-fromname{
+    margin-right: 10px;
+}
+.filter-wrap-search{
+    margin-bottom: 10px;
+}
