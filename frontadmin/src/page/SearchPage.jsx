@@ -10,6 +10,7 @@ function SearchPage() {
   const [isModalChooseImg , setIsModalChooseImg] = useState(false)
   const openModalChooseImg =()=> setIsModalChooseImg(true)
   const closeModalChooseImg =()=> setIsModalChooseImg(false)
+
   // useEffect(() => {
   //   if (!file) {
   //     setPreviewUrl(null);
@@ -65,9 +66,10 @@ function SearchPage() {
         <div className="filter-search">
           <form>
             <select>
-              <option>daily</option>
-              <option>monthly</option>
-              <option>yearly</option>
+              <option >-</option>
+              <option value="daily">daily</option>
+              <option value="monthly">monthly</option>
+              <option value="yearly">yearly</option>
             </select>
           </form>
         </div>
@@ -76,28 +78,28 @@ function SearchPage() {
       <div className="table-wrap">
         <div className="table-head">
           <div className="tr">
-            <div className="th id">ID</div>
-            <div className="th profile">profile</div>
+            <div className="th profile">face</div>
             <div className="th name">ชื่อ-นามสกุล</div>
             <div className="th gender">เพศ</div>
             <div className="th age">อายุ</div>
-            <div className="th edit">แก้ไข</div>
-            <div className="th delete">ลบ</div>
+            <div className="th age">อารมณ์</div>
+            <div className="th edit">วันที่</div>
+            <div className="th delete">เวลา</div>
+            <div className="th delete">BG</div>
           </div>
         </div>
         <div className="table-body">
           {users.map(user => (
             <div className='tr' key={user.UserID}>
-              <div className="td id">{user.UserID}</div>
               <div className="td profile" ><img src={img} style={{width:"40px",height:"40px"}}/></div>
               <div className="td name">{user.Name}</div>
               <div className="td gender">{user.Gender}</div>
               <div className="td age">{user.Age}</div>
-              <div className="td edit">
-                <button className="edit-user" >แก้ไข</button>
-              </div>
+              <div className="th age">อารมณ์</div>
+              <div className="th age">วันที่</div>
+              <div className="th age">เวลา</div>
               <div className="td delete">
-                <button className="delete-user" >ลบ</button>
+                <button className="delete-user" >BG</button>
               </div>
             </div>
           ))}
