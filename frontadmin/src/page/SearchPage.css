@@ -14,6 +14,13 @@
 .head-search-fromname{
     margin-right: 10px;
 }
+.table-body>.tr{
+    display: flex;
+    align-items: center;
+}
+.table-body>.tr:hover{
+    background-color: rgb(245, 245, 245);
+}
 .filter-wrap-search{
     margin-bottom: 10px;
 }

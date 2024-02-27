@@ -1,0 +1,27 @@
+.modal-container-Bgimg{
+    position: fixed;
+    left: 200px;
+    top: 0;
+    width: calc(100% - 200px);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.close-button{
+    display: flex;
+    justify-content: end;
+}
+.modal-Bgimg{
+    background-color: white;
+    border-radius: 0.5rem;
+    text-align: center;
+    padding: 2rem;
+    width: 500px;
+}
+.icon-close-wrap{
+    width: 35px;
+    background-color: white;
+    border: none;
+}

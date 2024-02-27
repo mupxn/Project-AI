@@ -37,9 +37,9 @@
 }
 .ReactCrop__child-wrapper > img{
     /* margin-bottom: 50px; */
-    width: 300px;
+    /* width: 300px;
     height: 300px;
-    object-fit: cover;
+    object-fit: cover; */
     /* background-color: blueviolet; */
 }
 .modal-footer-search{

@@ -3,32 +3,15 @@ import ModalChooseImg from '../element/ModalChooseImg';
 import "./SearchPage.css"
 import data from '../data.json'
 import img from "../img/testimg.jpeg"
+import ModalBgImage from '../element/ModalBgImage';
 const users = data.User
 function SearchPage() {
-  // const [file, setFile] = useState(null);
-  // const [previewUrl, setPreviewUrl] = useState(null);
+  
   const [isModalChooseImg , setIsModalChooseImg] = useState(false)
   const openModalChooseImg =()=> setIsModalChooseImg(true)
   const closeModalChooseImg =()=> setIsModalChooseImg(false)
 
-  // useEffect(() => {
-  //   if (!file) {
-  //     setPreviewUrl(null);
-  //     return;
-  //   }
-  //   const objectUrl = URL.createObjectURL(file);
-  //   setPreviewUrl(objectUrl);
-
-  //   return () => URL.revokeObjectURL(objectUrl);
-  // }, [file]);
-
-  // function handleFileChange(event) {
-  //   const file = event.target.files[0];
-  //   if (!file) {
-  //     return;
-  //   }
-  //   setFile(file);
-  // }
+  const [isModalBGImg , setIsModalBGImg] = useState(false)
 
   const [searchQuery, setSearchQuery] = useState('');
   const handleSearchChange = (e) => {
@@ -78,35 +61,39 @@ function SearchPage() {
       <div className="table-wrap">
         <div className="table-head">
           <div className="tr">
-            <div className="th profile">face</div>
+            <div className="th idDetect">number</div>
             <div className="th name">ชื่อ-นามสกุล</div>
             <div className="th gender">เพศ</div>
             <div className="th age">อายุ</div>
-            <div className="th age">อารมณ์</div>
-            <div className="th edit">วันที่</div>
-            <div className="th delete">เวลา</div>
-            <div className="th delete">BG</div>
+            <div className="th feel">อารมณ์</div>
+            <div className="th date">วันที่</div>
+            <div className="th time">เวลา</div>
+            <div className="th faceimg">Face</div>
+            <div className="th bgimg">BG</div>
           </div>
         </div>
         <div className="table-body">
           {users.map(user => (
             <div className='tr' key={user.UserID}>
-              <div className="td profile" ><img src={img} style={{width:"40px",height:"40px"}}/></div>
+              <div className="td idDetect" >1</div>
               <div className="td name">{user.Name}</div>
               <div className="td gender">{user.Gender}</div>
               <div className="td age">{user.Age}</div>
-              <div className="th age">อารมณ์</div>
-              <div className="th age">วันที่</div>
-              <div className="th age">เวลา</div>
-              <div className="td delete">
-                <button className="delete-user" >BG</button>
+              <div className="th feel">อารมณ์</div>
+              <div className="th date">วันที่</div>
+              <div className="th time">เวลา</div>
+              <div className="td faceimg"><img src={img} style={{width:"60px",height:"60px",objectFit:"cover"}}/></div>
+              <div className="td bgimg">
+                <button onClick={()=>setIsModalBGImg(true)}><img src={img} style={{width:"60px",height:"60px",objectFit:"cover"}}/></button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-
+      {isModalBGImg && (
+        <ModalBgImage onclose={()=>setIsModalBGImg(false)}/>
+      )}
       {isModalChooseImg && (
         <ModalChooseImg onclose={closeModalChooseImg}/>
       )}

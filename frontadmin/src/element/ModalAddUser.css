@@ -1,4 +1,4 @@
-.modal-container{
+.modal-container-adduser{
     position: fixed;
     left: 200px;
     top: 0;
@@ -9,12 +9,12 @@
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
 }
-.modal{
+.modal-adduser{
     background-color: white;
     border-radius: 0.5rem;
     text-align: center;
     padding: 2rem;
-    width: 300px;
+    width: 500px;
 }
 .btn{
     border: none;
@@ -31,22 +31,24 @@
 .btn-cancel{
     background-color: #d9534f;
 }
-.modal-content{
+.modal-content-adduser{
+    
     margin-bottom: 2rem;
 }
-.modal-footer{
+.modal-footer-adduser{
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
+    gap: 30px;
 }
 .input-wrap{
     margin-bottom: 20px;
     display: flex;
     margin-left: 30px;
-    /* justify-content: center; */
+    margin-left: 150px;
     gap: 20px;
 }
 @media screen and (max-width: 600px){
-    .modal-container{
+    .modal-container-adduser{
         width: calc(100% - 56px);
         left: 56px;
     }
