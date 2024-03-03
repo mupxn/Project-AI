@@ -64,7 +64,8 @@ def insert_face(name, emotion, age, gender, face_image, full_image):
 
 
 def gen_frames():
-    saved_faces = set()  # To track which faces have been saved
+    trackers = []  # List to hold trackers for each detected face
+    saved_faces = set()  # To track which faces have been saved to avoid duplicates
 
     while True:
         success, img = camera.read()
@@ -72,45 +73,55 @@ def gen_frames():
             break
 
         img_resized = cv2.resize(img, (640, 480))
-        imgFlipped = cv2.flip(img_resized, 1)
+        img_flipped = cv2.flip(img_resized, 1)  # Corrected variable name for consistency
 
-        gray_scale = cv2.cvtColor(imgFlipped, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray_scale, 1.1, 4)
+        # Update and remove trackers that have lost the face
+        for tracker in trackers[:]:
+            tracking_success, _ = tracker.update(img_flipped)
+            if not tracking_success:
+                trackers.remove(tracker)
 
-        for (x, y, w, h) in faces:
-            face_roi = imgFlipped[y:y+h, x:x+w]
-            cv2.rectangle(imgFlipped, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        # If no faces are currently being tracked, detect new faces
+        if not trackers:
+            gray_scale = cv2.cvtColor(img_flipped, cv2.COLOR_BGR2GRAY)
+            faces = face_cascade.detectMultiScale(gray_scale, 1.1, 4)
+            for (x, y, w, h) in faces:
+                tracker = cv2.TrackerKCF_create()
+                tracker.init(img_flipped, (x, y, w, h))
+                trackers.append(tracker)
 
-            # Generate a simple identifier for the face based on its position
-            face_id = f"{x}-{y}-{w}-{h}"
+                face_roi = img_flipped[y:y+h, x:x+w]
+                cv2.rectangle(img_flipped, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-            try:
-                if face_id not in saved_faces:
-                    analysis = DeepFace.analyze(face_roi, actions=['emotion', 'age', 'gender'], enforce_detection=False)
-                    emotion = analysis[0]['dominant_emotion']
-                    age = analysis[0]['age']
-                    gender = analysis[0]['dominant_gender']
-                    results = DeepFace.find(face_roi, db_path=db_path, model_name='VGG-Face', enforce_detection=False)
-                    
-                    if results and not results[0].empty:
-                        first_result_df = results[0]
-                        most_similar_face_path = first_result_df.iloc[0]['identity']
-                        most_similar_face_path = os.path.normpath(most_similar_face_path)
-                        name = os.path.basename(os.path.dirname(most_similar_face_path))
-                    else:
-                        name = 'Unknown'
+                face_id = f"{x}-{y}-{w}-{h}"  # Identifier based on the face position
 
-                    label = f"{name}, {emotion}, {age}, {gender}"
-                    cv2.putText(imgFlipped, label, (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-                    
-                    # Save face information only if it hasn't been saved before
-                    insert_face(name, emotion, age, gender, face_roi, imgFlipped)
-                    saved_faces.add(face_id)  # Mark this face as saved
-                    
-            except Exception as e:
-                print("Error in processing:", e)
+                try:
+                    if face_id not in saved_faces:
+                        analysis = DeepFace.analyze(face_roi, actions=['emotion', 'age', 'gender'], enforce_detection=False)
+                        emotion = analysis[0]['dominant_emotion']  # Corrected dictionary access
+                        age = analysis[0]['age']
+                        gender = analysis[0]['dominant_gender']
+                        results = DeepFace.find(face_roi, db_path=db_path, model_name='VGG-Face', enforce_detection=False)
 
-        ret, buffer = cv2.imencode('.jpg', imgFlipped)
+                        if results and not results[0].empty:
+                            first_result_df = results[0]
+                            most_similar_face_path = first_result_df.iloc[0]['identity']
+                            most_similar_face_path = os.path.normpath(most_similar_face_path)
+                            name = os.path.basename(os.path.dirname(most_similar_face_path))
+                        else:
+                            name = 'Unknown'
+
+                        label = f"{name}, {emotion}, {age}, {gender}"
+                        cv2.putText(img_flipped, label, (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+
+                        # Save face information only if it hasn't been saved before
+                        insert_face(name, emotion, age, gender, face_roi, img_flipped)
+                        saved_faces.add(face_id)  # Mark this face as saved
+
+                except Exception as e:
+                    print("Error in processing:", e)
+
+        ret, buffer = cv2.imencode('.jpg', img_flipped)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
