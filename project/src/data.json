@@ -22,26 +22,170 @@
         "DetectID": 1,
         "Date": "01/01/2025",
         "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
         "BgDetect": "/dataset/detect",
         "FaceDetect": "001_01-01-2025_12-00.jpg",
         "UserID":"001",
-        "TextID": "001"
+        "TextID": "001",
+        "EmoName": "Sad"
     },{
         "DetectID": 2,
         "Date": "01/01/2025",
         "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
         "BgDetect": "/dataset/detect",
         "FaceDetect": "001_01-01-2025_12-00.jpg",
-        "UserID":"002",
-        "TextID": "001"
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Happy"
     },{
         "DetectID": 3,
         "Date": "01/01/2025",
-        "Time": "12:01",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
         "BgDetect": "/dataset/detect",
         "FaceDetect": "001_01-01-2025_12-00.jpg",
-        "UserID":"002",
-        "TextID": "001"
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Surprise"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Angry"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Fear"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Neutural"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Surprise"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Sad"
+    },{
+        "DetectID": 2,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Happy"
+    },{
+        "DetectID": 3,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Surprise"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Angry"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Fear"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Neutural"
+    },{
+        "DetectID": 1,
+        "Date": "01/01/2025",
+        "Time": "12:00",
+        "Name": "noey",
+        "Age": "22",
+        "Gender": "Female",
+        "BgDetect": "/dataset/detect",
+        "FaceDetect": "001_01-01-2025_12-00.jpg",
+        "UserID":"001",
+        "TextID": "001",
+        "EmoName": "Surprise"
     }],
     "Emotional": [{
         "EmoID": "001",
@@ -51,7 +195,7 @@
         "EmoName": "Happy"
     },{
         "EmoID": "003",
-        "EmoName": "Natural"
+        "EmoName": "Neutural"
     },{
         "EmoID": "004",
         "EmoName": "Surprise"

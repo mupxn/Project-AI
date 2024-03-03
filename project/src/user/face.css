@@ -1,22 +1,37 @@
 .container {
   width: 100%;
-  display: block;
-  justify-content: center; /* Center the content horizontally */
-  align-items: center; /* Center the content vertically (if needed) */
+  height: 100vh;
+  display: flex;
 }
+
+.result-container {
+  width: 50%;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  overflow-y: auto;
+  flex-direction: column;
+  align-items: center;
+  background: #fff; /* Background color for visibility */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Optional: adds shadow for depth */
+  padding: 20px; /* Padding inside the result box */
+  box-sizing: border-box; /* Includes padding in the width and height */
+  border-radius: 10px; /* Optional: rounded corners */
+}
+
 
 .video-container {
   position: relative;
   width: 50%; /* Adjust based on your preference */
-  height: 50%;
+  height: auto; /* Changed to auto to maintain aspect ratio */
+  margin: 0 auto; /* Corrected syntax for margin */
   padding-bottom: 33.75%; /* Adjust for 16:9 aspect ratio, reduce percentage for larger vertical space */
-  margin: auto; /* Center the container */
+  border: #080808;
+  max-height: 75dvh;
 }
 
 .img {
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -24,14 +39,11 @@
 }
 
 .overlay-box {
-  overflow: hidden;
-  position: relative;
   display: flex;
   margin: 0 auto;
   margin-top: 1rem;
-  width: 50%; 
-  height: 4rem; 
-  border: 0.5px solid #080808;
+  width: 80%; 
+  height: auto; 
   border-radius: 10px;
   background-color: aqua; 
   justify-content: center; 
@@ -40,24 +52,148 @@
   justify-content: flex-start;
 }
 
-.face{
-  margin-left: 0.25rem;
-  width: 3.5rem;
-  height: 3.5rem;
-  object-fit:fill;
+.face,.emo{
+  width: 4rem;
+  height: 4rem;
+  margin: 0.3rem 0.3rem;
+  object-fit:cover;
   border-radius: 5px;
 }
 
+.text-box{
+  display: flex;
+  width: fit-content;
+  margin-left: 2%;
+  font-size: 0.9rem;
+  text-align: left;
+  flex-grow: 1;
+}
 
-@media screen and (max-width: 800px) {
+.row{
+  width:fit-content;
+  display: flex;
+  flex-direction: column;
+}
 
+.info{
+  margin-left: 1%;
+  width: max-content;
+}
+
+
+
+.emotional{
+  display: flex; 
+  align-items: center; 
+  flex-grow: 2; 
+  flex-direction: column;
+}
+
+.emo{
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit:fill;
+  margin: 0.3rem 0.3rem;
+}
+
+.right{
+  margin-left: 1rem;
+}
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #b6b5b5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #dbdada;
+}
+
+
+@media screen and (max-width: 1200px) {
+  .container {
+    width: 100%;
+    display: block;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically (if needed) */
+  }
   .video-container {
-    width: 80%; /* Adjust for smaller screens */
-    padding-bottom: 45%; /* Adjust the aspect ratio padding for smaller screens */
+    position: relative;
+    width: 80%; 
+    padding-bottom: 45%;
+    margin: auto;
   }
 
   .overlay-box {
-    width: 80%; 
-    height: 4rem;
+    width: 100%; 
   }
+
+  .result-container{
+    margin: 0 auto;
+    width: 80%;
+    margin-top: 2%;
+    display: block;
+  }
+
+  .text-box{
+    width: fit-content;
+    font-size: 1rem;
+    margin-left: 2%;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .row{
+    width: fit-content;
+    margin-left: 1%;
+  }
+
 }
+
+@media screen and (max-width: 800px) {
+  .container {
+    width: 100%;
+    display: block;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically (if needed) */
+  }
+  .video-container {
+    position: relative;
+    width: 80%; 
+    padding-bottom: 45%;
+    margin: auto;
+  }
+
+  .overlay-box {
+    width: 100%; 
+  }
+
+  .result-container{
+    margin: 0 auto;
+    width: 80%;
+    margin-top: 2%;
+    display: block;
+  }
+
+  .text-box{
+    width: fit-content;
+    font-size: 0.8rem;
+    margin-left: 2%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .row{
+    width: fit-content;
+    margin-left: 1%;
+  }
+
+}
+

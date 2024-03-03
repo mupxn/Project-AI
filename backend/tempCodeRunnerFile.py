@@ -1,12 +1,40 @@
-from flask import Flask, render_template, Response
+from flask import Flask, jsonify, Response
+from flask_cors import CORS
+import json
+import os
 import cv2
 from deepface import DeepFace
 import os
-import time
+from datetime import timedelta
+import tempfile
+import base64
+import mysql.connector
+from mysql.connector import Error
+
 
 app = Flask(__name__)
+CORS(app)
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, timedelta):
+            # Convert timedelta to a string representation
+            return str(obj)
+        # Let the base class default method raise the TypeError
+        return super().default(obj)
+app.json_encoder = CustomJSONEncoder()
 
 camera = cv2.VideoCapture(0)  # Use 0 for the default webcam
+
+connection = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="",
+  database="project-ai"
+)
+
+mydb = connection.cursor()
+
 
 if not camera.isOpened():
     print("Error: Could not open camera.")
@@ -16,15 +44,27 @@ if not camera.isOpened():
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Specify the database path
-db_path = "backen/data_set/user"
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
 
-# Dictionary to store the last known analysis for each face
-last_known_analysis = {}
+def insert_face(name, emotion, age, gender, face_image, full_image):
+    face_image_base64 = base64.b64encode(cv2.imencode('.jpg', face_image)[1]).decode()
+    full_image_base64 = base64.b64encode(cv2.imencode('.jpg', full_image)[1]).decode()
+
+    sql = ("INSERT INTO detection (UserID, TextID, Age, Gender, FaceDetect, BgDetect) "
+           "VALUES (%s, (SELECT TextID FROM emotionaltext "
+           "JOIN emotional ON emotionaltext.EmoID = emotional.EmoID "
+           "WHERE emotional.EmoName = %s ORDER BY RAND() LIMIT 1), %s, %s, %s, %s)")
+    val = (name, emotion, age, gender, face_image_base64, full_image_base64)
+
+    try:
+        mydb.execute(sql, val)
+        connection.commit()
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
 
 def gen_frames():
-    global last_known_analysis
-    analysis_interval = 1  # Seconds between analyses
-    last_analysis_time = 0
+    saved_faces = set()  # To track which faces have been saved
 
     while True:
         success, img = camera.read()
@@ -37,54 +77,102 @@ def gen_frames():
         gray_scale = cv2.cvtColor(imgFlipped, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray_scale, 1.1, 4)
 
-        current_time = time.time()
-        if current_time - last_analysis_time > analysis_interval:
-            last_known_analysis = {}  # Clear previous analysis to handle faces leaving the frame
-
         for (x, y, w, h) in faces:
-            cv2.rectangle(imgFlipped, (x, y), (x+w, y+h), (255, 0, 0), 2)
             face_roi = imgFlipped[y:y+h, x:x+w]
+            cv2.rectangle(imgFlipped, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-            face_id = f"{x}_{y}"  # Simplified identifier based on position
+            # Generate a simple identifier for the face based on its position
+            face_id = f"{x}-{y}-{w}-{h}"
 
-            if current_time - last_analysis_time > analysis_interval:
-                try:
-                    # Perform face recognition and emotion detection
+            try:
+                if face_id not in saved_faces:
+                    analysis = DeepFace.analyze(face_roi, actions=['emotion', 'age', 'gender'], enforce_detection=False)
+                    emotion = analysis[0]['dominant_emotion']
+                    age = analysis[0]['age']
+                    gender = analysis[0]['dominant_gender']
                     results = DeepFace.find(face_roi, db_path=db_path, model_name='VGG-Face', enforce_detection=False)
-                    name = 'Unknown'
-                    if len(results) > 0 and not results[0].empty:
-                        most_similar_face_path = results[0].iloc[0]['identity']
+                    
+                    if results and not results[0].empty:
+                        first_result_df = results[0]
+                        most_similar_face_path = first_result_df.iloc[0]['identity']
                         most_similar_face_path = os.path.normpath(most_similar_face_path)
                         name = os.path.basename(os.path.dirname(most_similar_face_path))
+                    else:
+                        name = 'Unknown'
+
+                    label = f"{name}, {emotion}, {age}, {gender}"
+                    cv2.putText(imgFlipped, label, (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
                     
-                    analysis = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
-                    emotion = analysis[0]['dominant_emotion']
+                    # Save face information only if it hasn't been saved before
+                    insert_face(name, emotion, age, gender, face_roi, imgFlipped)
+                    saved_faces.add(face_id)  # Mark this face as saved
+                    
+            except Exception as e:
+                print("Error in processing:", e)
 
-                    # Update the last known analysis
-                    last_known_analysis[face_id] = (name, emotion)
-
-                    last_analysis_time = current_time
-                except Exception as e:
-                    print("Error in processing:", e)
-                    last_known_analysis[face_id] = ("Error", "Error")
-            else:
-                # Use the last known analysis if available
-                name, emotion = last_known_analysis.get(face_id)
-
-            # Display the name and emotion
-            text = f"{name}, {emotion}"
-            cv2.putText(imgFlipped, text, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-
-        # Encode the frame before sending it
         ret, buffer = cv2.imencode('.jpg', imgFlipped)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
+
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/user/showresult')
+def get_records_from_today():
+    query = """
+    SELECT 
+        user.Name, 
+        detection.Gender, 
+        detection.Age, 
+        detection.Date,
+        detection.Time,
+        detection.FaceDetect,
+        emotional.EmoName
+    FROM 
+        detection 
+    JOIN 
+        user ON detection.UserID = user.UserID 
+    JOIN 
+        emotionaltext ON emotionaltext.TextID = detection.TextID 
+    JOIN 
+        emotional ON emotionaltext.EmoID = emotional.EmoID 
+    WHERE 
+        detection.Date = CURDATE()
+    ORDER BY detection.DetectID DESC;
+    """
+    
+    try:
+        mydb.execute(query)
+        records = mydb.fetchall()  # Fetch all records matching today's date
+        
+        for record in records:
+            # Formatting each record as a dictionary
+            formatted_record = {
+            "Name": record[0],
+            "Gender": record[1],
+            "Age": record[2],
+            "Date": str(record[3]),  
+            "Time": str(record[4]),  
+            "FaceDetect": record[5],  
+            "EmoName" : record[6],
+             }
+            
+        if not records:
+            return jsonify({"message": "No records found for today."}), 404
+        
+        formatted_records = [{"Name": record[0], "Gender": record[1], "Age": record[2], "Date": str(record[3]), "Time": str(record[4]), "FaceDetect": record[5], "EmoName": record[6]} for record in records]
+        
+        return jsonify(formatted_records)
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({"error": str(err)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', threaded=True, debug=True)
+    app.run(host='0.0.0.0', debug=True)
+    
+    
