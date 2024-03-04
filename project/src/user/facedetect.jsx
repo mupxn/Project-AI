@@ -5,7 +5,7 @@ import axios from "axios";
 const FaceDetect = () => {
 
   const [detect, setDetection] = useState([]);
-  const fetchInterval = 500;
+  const fetchInterval = 1000;
 
   useEffect(() => {
     const fetchData = () => {

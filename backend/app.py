@@ -13,8 +13,6 @@ import pyttsx3
 
 
 
-
-
 app = Flask(__name__)
 CORS(app)
 
@@ -43,10 +41,8 @@ if not camera.isOpened():
     print("Error: Could not open camera.")
     exit()
 
-# Load Haarcascades for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Specify the database path
 db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
 
@@ -59,7 +55,6 @@ def sound(emotion):
     """
     val = (emotion,)  
 
-    # Use cursor to execute and fetch
     mydb.execute(query, val)
     result = mydb.fetchone()  
 
@@ -175,6 +170,7 @@ def gen_frames():
                         insert_face(name, emotion, age, gender, face_roi, img_flipped)
                         saved_faces.add(face_id)
                         sound(emotion)
+
                     except Exception as e:
                         print("Error in processing:", e)
 
@@ -219,18 +215,6 @@ def get_records_from_today():
         mydb.execute(query)
         records = mydb.fetchall() 
         
-        for record in records:
-            # Formatting each record as a dictionary
-            formatted_record = {
-            "Name": record[0],
-            "Gender": record[1],
-            "Age": record[2],
-            "Date": str(record[3]),  
-            "Time": str(record[4]),  
-            "FaceDetect": record[5],  
-            "EmoName" : record[6],
-             }
-            
         if not records:
             return jsonify({"message": "No records found for today."}), 404
         
