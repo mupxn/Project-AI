@@ -1,4 +1,7 @@
-.Bar,.Pie,.Line{
+.Bar,.Pie{
     width: fit-content;
+    background-color: white;
+}
+.Line{
     background-color: white;
 }
