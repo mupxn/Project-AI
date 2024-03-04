@@ -10,6 +10,7 @@ import numpy as np
 import base64
 import mysql.connector
 import pyttsx3
+import threading
 
 
 
@@ -99,7 +100,36 @@ def calculate_motion(prev_frame, current_frame):
     
     return motion_measure
 
-def gen_frames():
+def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
+    try:
+        analysis = DeepFace.analyze(face_roi, actions=['emotion', 'age', 'gender'], enforce_detection=False)
+        emotion = analysis[0]['dominant_emotion']
+        age = analysis[0]['age']
+        gender = analysis[0]['dominant_gender']
+
+        results = DeepFace.find(face_roi, db_path=db_path, model_name='VGG-Face', enforce_detection=False)
+        if results and not results[0].empty:
+            first_result_df = results[0]
+            most_similar_face_path = first_result_df.iloc[0]['identity']
+            most_similar_face_path = os.path.normpath(most_similar_face_path)
+            name = os.path.basename(os.path.dirname(most_similar_face_path))
+        else:
+            name = 'Unknown'
+
+        label = f"{name}, {emotion}, {age}, {gender}"
+        cv2.putText(img_flipped, label, (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+
+        # Assuming insert_face and sound are defined elsewhere and handle their tasks accordingly.
+        insert_face(name, emotion, age, gender, face_roi, img_flipped)
+        sound(emotion)
+
+        face_id = f"{x}-{y}-{w}-{h}"
+        saved_faces.add(face_id)
+
+    except Exception as e:
+        print("Error in processing:", e)
+
+def gen_frames(camera, db_path):
     trackers = []  # List to hold trackers for each detected face
     saved_faces = set()  # To track which faces have been saved to avoid duplicates
     prev_frame = None  # Variable to store the previous frame for motion detection
@@ -123,56 +153,25 @@ def gen_frames():
         prev_frame = img_flipped
 
         # Update and remove trackers that have lost the face
-        for tracker in trackers[:]:
-            tracking_success, _ = tracker.update(img_flipped)
-            if not tracking_success:
-                trackers.remove(tracker)
+        trackers = [tracker for tracker in trackers if tracker.update(img_flipped)[0]]
 
         gray_scale = cv2.cvtColor(img_flipped, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray_scale, 1.1, 4)
-        
+
+        # Process faces
         for (x, y, w, h) in faces:
             cv2.rectangle(img_flipped, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
 
         # Detect new faces if no trackers are active
         if not trackers:
             for (x, y, w, h) in faces:
+                face_roi = img_flipped[y:y+h, x:x+w]
+                # Use threading for DeepFace analysis to avoid blocking video processing
+                threading.Thread(target=analyze_face, args=(face_roi, x, y, w, h, img_flipped, saved_faces,db_path)).start()
+
                 tracker = cv2.TrackerKCF_create()
                 tracker.init(img_flipped, (x, y, w, h))
                 trackers.append(tracker)
-
-                face_roi = img_flipped[y:y+h, x:x+w]
-                cv2.rectangle(img_flipped, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
-                face_id = f"{x}-{y}-{w}-{h}"
-                if face_id not in saved_faces:
-                    try:
-                        analysis = DeepFace.analyze(face_roi, actions=['emotion', 'age', 'gender'], enforce_detection=False)
-                        emotion = analysis[0]['dominant_emotion']
-                        age = analysis[0]['age']
-                        gender = analysis[0]['dominant_gender']
-                        results = DeepFace.find(face_roi, db_path=db_path, model_name='VGG-Face', enforce_detection=False)
-
-                        if results and not results[0].empty:
-                            first_result_df = results[0]
-                            most_similar_face_path = first_result_df.iloc[0]['identity']
-                            most_similar_face_path = os.path.normpath(most_similar_face_path)
-                            name = os.path.basename(os.path.dirname(most_similar_face_path))
-                        else:
-                            name = 'Unknown'
-
-                            
-                        label = f"{name}, {emotion}, {age}, {gender}"
-                        cv2.putText(img_flipped, label, (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-
-                        
-                        insert_face(name, emotion, age, gender, face_roi, img_flipped)
-                        saved_faces.add(face_id)
-                        sound(emotion)
-
-                    except Exception as e:
-                        print("Error in processing:", e)
 
         # Encode the processed frame for streaming
         ret, buffer = cv2.imencode('.jpg', img_flipped)
@@ -184,7 +183,7 @@ def gen_frames():
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen_frames(),
+    return Response(gen_frames(camera, db_path),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/user/showresult')
