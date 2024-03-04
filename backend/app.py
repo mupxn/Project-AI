@@ -54,7 +54,7 @@ def sound(emotion):
     JOIN emotional ON emotionaltext.EmoID = emotional.EmoID 
     WHERE emotional.EmoName = %s ORDER BY RAND() LIMIT 1
     """
-    val = (emotion)  
+    val = (emotion,)  
 
     mydb.execute(query, val)
     result = mydb.fetchone()  
