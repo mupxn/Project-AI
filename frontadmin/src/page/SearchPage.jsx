@@ -1,25 +1,31 @@
-import React, { useState,useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import ModalChooseImg from '../element/ModalChooseImg';
 import "./SearchPage.css"
 import data from '../data.json'
 import img from "../img/testimg.jpeg"
 import ModalBgImage from '../element/ModalBgImage';
+
 const users = data.User
+
 function SearchPage() {
-  
-  const [isModalChooseImg , setIsModalChooseImg] = useState(false)
-  const openModalChooseImg =()=> setIsModalChooseImg(true)
-  const closeModalChooseImg =()=> setIsModalChooseImg(false)
-
-  const [isModalBGImg , setIsModalBGImg] = useState(false)
-
+  const [selectedFilter, setSelectedFilter] = useState('');
+  const [isModalChooseImg, setIsModalChooseImg] = useState(false)
+  const openModalChooseImg = () => setIsModalChooseImg(true)
+  const closeModalChooseImg = () => setIsModalChooseImg(false)
+  const [isModalBGImg, setIsModalBGImg] = useState(false)
   const [searchQuery, setSearchQuery] = useState('');
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
+  };
+  const handleFilterChange = (e) => {
+    const filterValue = e.target.value;
+    console.log(filterValue);
+    setSelectedFilter(filterValue);
   };
 
   return (
@@ -40,15 +46,13 @@ function SearchPage() {
           </div>
           <div className="head-search-fromimg">
             <button onClick={openModalChooseImg}>search from img</button>
-            {/* <input type="file" onChange={handleFileChange} accept="image/png, image/jpeg"/>
-            {previewUrl && <img src={previewUrl} alt="Preview" style={{width: '100px', height: '100px'}} />} */}
           </div>
         </div>
       </div>
       <div className="filter-wrap-search">
         <div className="filter-search">
           <form>
-            <select>
+            <select onChange={handleFilterChange}>
               <option >-</option>
               <option value="daily">daily</option>
               <option value="monthly">monthly</option>
@@ -82,9 +86,9 @@ function SearchPage() {
               <div className="th feel">อารมณ์</div>
               <div className="th date">วันที่</div>
               <div className="th time">เวลา</div>
-              <div className="td faceimg"><img src={img} style={{width:"60px",height:"60px",objectFit:"cover"}}/></div>
+              <div className="td faceimg"><img src={img} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
               <div className="td bgimg">
-                <button onClick={()=>setIsModalBGImg(true)}><img src={img} style={{width:"60px",height:"60px",objectFit:"cover"}}/></button>
+                <button onClick={() => setIsModalBGImg(true)}><img src={img} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
               </div>
             </div>
           ))}
@@ -92,10 +96,10 @@ function SearchPage() {
       </div>
 
       {isModalBGImg && (
-        <ModalBgImage onclose={()=>setIsModalBGImg(false)}/>
+        <ModalBgImage onclose={() => setIsModalBGImg(false)} />
       )}
       {isModalChooseImg && (
-        <ModalChooseImg onclose={closeModalChooseImg}/>
+        <ModalChooseImg onclose={closeModalChooseImg} />
       )}
     </div>
   )
