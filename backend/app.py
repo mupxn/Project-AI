@@ -32,7 +32,7 @@ connection = mysql.connector.connect(
   host="localhost",
   user="root",
   password="",
-  database="project-ai"
+  database="project"
 )
 
 mydb = connection.cursor()
