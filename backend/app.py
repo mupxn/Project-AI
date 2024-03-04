@@ -116,10 +116,6 @@ def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
         else:
             name = 'Unknown'
 
-        label = f"{name}, {emotion}, {age}, {gender}"
-        cv2.putText(img_flipped, label, (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-
-        # Assuming insert_face and sound are defined elsewhere and handle their tasks accordingly.
         insert_face(name, emotion, age, gender, face_roi, img_flipped)
         sound(emotion)
 
@@ -168,7 +164,6 @@ def gen_frames(camera, db_path):
                 face_roi = img_flipped[y:y+h, x:x+w]
                 # Use threading for DeepFace analysis to avoid blocking video processing
                 threading.Thread(target=analyze_face, args=(face_roi, x, y, w, h, img_flipped, saved_faces,db_path)).start()
-
                 tracker = cv2.TrackerKCF_create()
                 tracker.init(img_flipped, (x, y, w, h))
                 trackers.append(tracker)

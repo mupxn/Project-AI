@@ -45,11 +45,12 @@
   width: 80%; 
   height: auto; 
   border-radius: 10px;
-  background-color: aqua; 
   justify-content: center; 
   align-items: center;
   color: #080808;
   justify-content: flex-start;
+  background-color: #FFE51D;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .face,.emo{
@@ -87,6 +88,8 @@
   align-items: center; 
   flex-grow: 2; 
   flex-direction: column;
+  width: max-content
+  ;
 }
 
 .emo{

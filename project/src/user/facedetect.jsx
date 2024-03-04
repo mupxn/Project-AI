@@ -6,6 +6,14 @@ const FaceDetect = () => {
 
   const [detect, setDetection] = useState([]);
   const fetchInterval = 1000;
+  const EmotionColor = {
+    happy: '#FDFD96',
+    sad: '#B2CEFE',
+    angry: '#FDA487',
+    surprise: '#C3B1E1',
+    neutral: '#98FF98',
+    fear: 'lightgray', 
+  };
 
   useEffect(() => {
     const fetchData = () => {
@@ -18,11 +26,11 @@ const FaceDetect = () => {
         });
     };
 
-    fetchData(); // Fetch data immediately on component mount
+    fetchData(); 
 
-    const interval = setInterval(fetchData, fetchInterval); // Set up a timer to fetch data repeatedly
+    const interval = setInterval(fetchData, fetchInterval); 
 
-    return () => clearInterval(interval); // Clean up the interval on component unmount
+    return () => clearInterval(interval); 
   }, []);
   
 
@@ -37,7 +45,7 @@ const FaceDetect = () => {
       </div>
       <div className="result-container">
         {detect.map((item) => (
-          <div key={item.DetectID} className="overlay-box">
+          <div key={item.DetectID} className="overlay-box" style={{ backgroundColor: EmotionColor[item.EmoName]}}>
             <img
               src={`data:image/jpeg;base64,${item.FaceDetect}`}
               className="face"
