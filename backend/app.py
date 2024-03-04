@@ -54,7 +54,7 @@ def sound(emotion):
     JOIN emotional ON emotionaltext.EmoID = emotional.EmoID 
     WHERE emotional.EmoName = %s ORDER BY RAND() LIMIT 1
     """
-    val = (emotion,)  
+    val = (emotion)  
 
     mydb.execute(query, val)
     result = mydb.fetchone()  
@@ -90,16 +90,6 @@ def insert_face(name, emotion, age, gender, face_image, full_image):
         print(f"Error: {err}")
 
 
-def calculate_motion(prev_frame, current_frame):
-    gray_prev = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
-    gray_current = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
-    
-    frame_diff = cv2.absdiff(gray_prev, gray_current)
-    
-    motion_measure = np.sum(frame_diff)
-    
-    return motion_measure
-
 def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
     try:
         analysis = DeepFace.analyze(face_roi, actions=['emotion', 'age', 'gender'], enforce_detection=False)
@@ -126,10 +116,8 @@ def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
         print("Error in processing:", e)
 
 def gen_frames(camera, db_path):
-    trackers = []  # List to hold trackers for each detected face
-    saved_faces = set()  # To track which faces have been saved to avoid duplicates
-    prev_frame = None  # Variable to store the previous frame for motion detection
-    motion_threshold = 1000000  # Set an appropriate threshold value
+    trackers = []  
+    saved_faces = set()  
 
     while True:
         success, img = camera.read()
@@ -139,36 +127,26 @@ def gen_frames(camera, db_path):
         img_resized = cv2.resize(img, (640, 480))
         img_flipped = cv2.flip(img_resized, 1)
 
-        # If the previous frame is available, calculate the motion
-        if prev_frame is not None:
-            motion = calculate_motion(prev_frame, img_flipped)
-            if motion > motion_threshold:  # Skip detection if there's too much motion
-                prev_frame = img_flipped
-                continue
-
-        prev_frame = img_flipped
-
-        # Update and remove trackers that have lost the face
+       
         trackers = [tracker for tracker in trackers if tracker.update(img_flipped)[0]]
 
         gray_scale = cv2.cvtColor(img_flipped, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray_scale, 1.1, 4)
 
-        # Process faces
         for (x, y, w, h) in faces:
             cv2.rectangle(img_flipped, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        # Detect new faces if no trackers are active
+       
         if not trackers:
             for (x, y, w, h) in faces:
                 face_roi = img_flipped[y:y+h, x:x+w]
                 # Use threading for DeepFace analysis to avoid blocking video processing
-                threading.Thread(target=analyze_face, args=(face_roi, x, y, w, h, img_flipped, saved_faces,db_path)).start()
+                threading.Thread(target=analyze_face, args=(face_roi, x, y, w, h, img_flipped, saved_faces, db_path)).start()
                 tracker = cv2.TrackerKCF_create()
                 tracker.init(img_flipped, (x, y, w, h))
                 trackers.append(tracker)
 
-        # Encode the processed frame for streaming
+    
         ret, buffer = cv2.imencode('.jpg', img_flipped)
         frame = buffer.tobytes()
         yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
