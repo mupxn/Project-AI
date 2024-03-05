@@ -112,7 +112,7 @@ def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
             most_similar_face_path = os.path.normpath(most_similar_face_path)
             name = os.path.basename(os.path.dirname(most_similar_face_path))
         else:
-            name = 'Unknown'
+            name = 0
 
         insert_face(name, emotion, age, gender, face_roi, img_flipped)
         sound(name,emotion)
@@ -169,12 +169,12 @@ def video_feed():
 @app.route('/user/showresult')
 def get_records_from_today():
     query = """
-    SELECT 
+     SELECT 
         user.Name, 
         detection.Gender, 
         detection.Age, 
-        detection.Date,
-        detection.Time,
+        DATE(detection.DateTime) AS Date,
+        TIME(detection.DateTime) AS Time,
         detection.FaceDetect,
         emotional.EmoName
     FROM 
@@ -186,7 +186,7 @@ def get_records_from_today():
     JOIN 
         emotional ON emotionaltext.EmoID = emotional.EmoID 
     WHERE 
-        detection.Date = CURDATE()
+        DATE(detection.DateTime) = CURDATE()
     ORDER BY detection.DetectID DESC;
     """
     
