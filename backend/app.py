@@ -17,6 +17,8 @@ import threading
 app = Flask(__name__)
 CORS(app)
 
+
+
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, timedelta):
@@ -47,28 +49,34 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
 
-def sound(emotion):
-
+def sound(name, emotion):
     query = """
-    SELECT emotionaltext.Text FROM emotionaltext 
+    SELECT emotionaltext.Text, user.Name 
+    FROM detection 
+    JOIN emotionaltext ON detection.TextID = emotionaltext.TextID 
     JOIN emotional ON emotionaltext.EmoID = emotional.EmoID 
-    WHERE emotional.EmoName = %s ORDER BY RAND() LIMIT 1
+    JOIN user ON detection.UserID = user.UserID
+    WHERE emotional.EmoName = %s AND detection.UserID = %s
+    ORDER BY detection.DetectID DESC 
+    LIMIT 1
     """
-    val = (emotion,)  
+    val = (emotion, name)  
 
     mydb.execute(query, val)
     result = mydb.fetchone()  
 
     if result:
-        text_to_speak = result[0]
+        text_to_speak, user_name = result
         engine = pyttsx3.init()
-        engine.setProperty('volume', 0.9) 
+        engine.setProperty('volume', 1) 
         engine.setProperty('rate', 120) 
         engine.setProperty('voice', TH_voice_id)
-        engine.say(text_to_speak)
+        engine.say('คุณ' + user_name + ' ' + text_to_speak)
         engine.runAndWait()
     else:
-        print("No text found for the given emotion.")
+        print("No records found.")
+
+    
 
 
 
@@ -97,7 +105,7 @@ def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
         age = analysis[0]['age']
         gender = analysis[0]['dominant_gender']
 
-        results = DeepFace.find(face_roi, db_path=db_path, model_name='VGG-Face', enforce_detection=False)
+        results = DeepFace.find(face_roi, db_path=db_path, enforce_detection=False)
         if results and not results[0].empty:
             first_result_df = results[0]
             most_similar_face_path = first_result_df.iloc[0]['identity']
@@ -107,7 +115,7 @@ def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
             name = 'Unknown'
 
         insert_face(name, emotion, age, gender, face_roi, img_flipped)
-        sound(emotion)
+        sound(name,emotion)
 
         face_id = f"{x}-{y}-{w}-{h}"
         saved_faces.add(face_id)
@@ -140,7 +148,6 @@ def gen_frames(camera, db_path):
         if not trackers:
             for (x, y, w, h) in faces:
                 face_roi = img_flipped[y:y+h, x:x+w]
-                # Use threading for DeepFace analysis to avoid blocking video processing
                 threading.Thread(target=analyze_face, args=(face_roi, x, y, w, h, img_flipped, saved_faces, db_path)).start()
                 tracker = cv2.TrackerKCF_create()
                 tracker.init(img_flipped, (x, y, w, h))
@@ -196,8 +203,11 @@ def get_records_from_today():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({"error": str(err)}), 500
+    
+
+        
+        
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
-    
     
