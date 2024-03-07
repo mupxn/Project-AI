@@ -1,7 +1,10 @@
 .Bar,.Pie{
     width: fit-content;
     background-color: white;
+    border-radius: 0.5rem;
+
 }
 .Line{
     background-color: white;
+    border-radius: 0.5rem;
 }

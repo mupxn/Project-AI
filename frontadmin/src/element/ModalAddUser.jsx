@@ -70,17 +70,6 @@ function ModalAddUser({ onClose }) {
                                     <label>ชื่อ :</label>
                                     <input type='text' id='name' />
                                 </div>
-                                <div className="input-wrap">
-                                    <label>เพศ :</label>
-                                    <select>
-                                        <option id='gender'>F</option>
-                                        <option id='gender'>M</option>
-                                    </select>
-                                </div>
-                                <div className="input-wrap">
-                                    <label>dob :</label>
-                                    <input type='date' id='date' max={maxDate} />
-                                </div>
                                 <div className="input-wrap img">
                                     <button onClick={() => setIsImg(true)}>img</button>
                                 </div>

@@ -9,30 +9,30 @@ function ModalDeleteUser({ onClose, userId}) {
         console.log(userId);
     }
     return (
-        <div className='modal-container'>
-            <div className="modal">
-                <div className="modal-header">
+        <div className='modal-container-delete'>
+            <div className="modal-delete">
+                <div className="modal-header-delete">
                     <h1>Delete User</h1>
                 </div>
                 {!isSubmitted ? (
                     <>
-                        <div className="modal-content">
+                        <div className="modal-content-delete">
                             <p>Are you sure to delete {userId}?</p>
                         </div>
-                        <div className="modal-footer">
+                        <div className="modal-footer-delete">
                             <button className='btn btn-submit' onClick={Submitted} >Submit</button>
                             <button className='btn btn-cancel' onClick={onClose}>Cancel</button>
                         </div>
                     </>
                 ) : (
                     <>
-                        <div className="modal-content">
+                        <div className="modal-content-delete">
                             <div className='icon'>
                                 <CheckmarkIcon/>
                             </div>
                             
                         </div>
-                        <div className="modal-footer">
+                        <div className="modal-footer-delete">
                             <button className='btn btn-ok' onClick={onClose}>ok</button>
                         </div>
                     </>
