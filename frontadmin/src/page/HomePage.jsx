@@ -52,7 +52,14 @@ function HomePage() {
             {selectedFilter === 'yearly' &&
               <>
                 <form>
-                
+                  <select>
+                    <option >2019</option>
+                    <option >2020</option>
+                    <option >2021</option>
+                    <option >2022</option>
+                    <option >2023</option>
+                    <option value="2024">2024</option>
+                  </select>
                 </form>
               </>
             }
