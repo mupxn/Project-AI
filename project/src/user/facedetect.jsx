@@ -5,7 +5,7 @@ import axios from "axios";
 const FaceDetect = () => {
 
   const [detect, setDetection] = useState([]);
-  const fetchInterval = 1500;
+  const fetchInterval = 500;
   const EmotionColor = {
     happy: '#FDFD96',
     sad: '#B2CEFE',
