@@ -24,3 +24,7 @@
 .filter-wrap-search{
     margin-bottom: 10px;
 }
+.filter-search{
+    display: flex;
+    gap: 20px;
+}

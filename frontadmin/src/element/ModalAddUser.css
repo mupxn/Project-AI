@@ -43,9 +43,8 @@
 .input-wrap{
     margin-bottom: 20px;
     display: flex;
-    margin-left: 30px;
-    margin-left: 150px;
     gap: 20px;
+    justify-content: center;
 }
 @media screen and (max-width: 600px){
     .modal-container-adduser{

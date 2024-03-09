@@ -1,4 +1,4 @@
-.modal-container{
+.modal-container-delete{
     position: fixed;
     left: 200px;
     top: 0;
@@ -9,7 +9,10 @@
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
 }
-.modal{
+.modal-header-delete h1{
+    margin-bottom: 0;
+}
+.modal-delete{
     background-color: white;
     border-radius: 0.5rem;
     text-align: center;
@@ -32,15 +35,19 @@
 .btn-cancel{
     background-color: #d9534f;
 }
-.modal-footer{
+.modal-footer-delete{
     display: flex;
     justify-content: space-evenly;
 }
-.modal-content .icon{
+.modal-content-delete .icon{
     width: 60px;
     /* background-color: #d9534f; */
 }
-.modal-content{
+.modal-content-delete p{
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+.modal-content-delete{
     display: flex;
     justify-content: center;
 }
@@ -48,7 +55,7 @@
     background-color: #0d6efd;;
 }
 @media screen and (max-width: 600px){
-    .modal-container{
+    .modal-container-delete{
         width: calc(100% - 56px);
         left: 56px;
     }

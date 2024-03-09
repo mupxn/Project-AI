@@ -27,14 +27,6 @@ function ModalEditUser({ onClose, userId }) {
                                 <div className='section-edit'>Name :</div>
                                 <div>noey</div>
                             </div>
-                            <div className="user-info-edit">
-                                <div className='section-edit'>Gender :</div>
-                                <div>F</div>
-                            </div>
-                            <div className="user-info-edit">
-                                <div className='section-edit'>dob : </div>
-                                <div>01/09/2001</div>
-                            </div>
                         </div>
                         <div className="modal-footer-edit">
                             <button className='btn btn-submit' onClick={edited}>Edit</button>
@@ -48,17 +40,6 @@ function ModalEditUser({ onClose, userId }) {
                                 <div className="user-info-edit">
                                     <label className='section-edit'>Name :</label>
                                     <input type='text' id='name' />
-                                </div>
-                                <div className="user-info-edit">
-                                    <label className='section-edit'>Gender :</label>
-                                    <select>
-                                        <option id='gender'>F</option>
-                                        <option id='gender'>M</option>
-                                    </select>
-                                </div>
-                                <div className="user-info-edit">
-                                    <label className='section-edit'>dob : </label>
-                                    <input type='date' id='date' max={maxDate} />
                                 </div>
                             </div>
                             <div className="modal-footer-edit">

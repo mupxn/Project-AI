@@ -42,11 +42,6 @@ function UserPage() {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
   };
-
-  const [ posts,setPosts ] = useState([])
-  const [ loading,setLoading ] = useState(false)
-  const [ currentPage, setCurrentPage ] = useState(1)
-  const [ postsPerPage, setPostsPerPage ] = useState(10)
   
   return (
     <div className='user'>
@@ -63,7 +58,7 @@ function UserPage() {
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
-              <button type="submit">Search</button>
+              {/* <button type="submit">Search</button> */}
             </form>
           </div>
           <div className="head-adduser">

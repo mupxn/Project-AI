@@ -28,7 +28,7 @@ function PieChart() {
         options={chartOptions.options}
         series={chartOptions.series}
         type="pie"
-        width="380"
+        width="380px"
       />
     </div>
   )

@@ -4,16 +4,17 @@ import "./SearchPage.css"
 import data from '../data.json'
 import img from "../img/testimg.jpeg"
 import ModalBgImage from '../element/ModalBgImage';
-
 const users = data.User
 
 function SearchPage() {
-  const [selectedFilter, setSelectedFilter] = useState('');
+  const [maxDate, setMaxDate] = useState('');
+  const [maxMonth, setMaxMonth] = useState('');
   const [isModalChooseImg, setIsModalChooseImg] = useState(false)
-  const openModalChooseImg = () => setIsModalChooseImg(true)
-  const closeModalChooseImg = () => setIsModalChooseImg(false)
   const [isModalBGImg, setIsModalBGImg] = useState(false)
   const [searchQuery, setSearchQuery] = useState('');
+  const openModalChooseImg = () => setIsModalChooseImg(true)
+  const closeModalChooseImg = () => setIsModalChooseImg(false)
+  const [selectedFilter, setSelectedFilter] = useState('')
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -24,10 +25,16 @@ function SearchPage() {
   };
   const handleFilterChange = (e) => {
     const filterValue = e.target.value;
-    console.log(filterValue);
-    setSelectedFilter(filterValue);
-  };
+    setSelectedFilter(filterValue)
+  }
 
+  useEffect(() => {
+    const today = new Date()
+    const maxDateValue = today.toISOString().split('T')[0];
+    const maxMonthValue = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`;
+    setMaxMonth(maxMonthValue);
+    setMaxDate(maxDateValue);
+  }, []);
   return (
     <div className='search'>
       <div className="head-search-wrap">
@@ -41,7 +48,7 @@ function SearchPage() {
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
-              <button type="submit">Search</button>
+              {/* <button type="submit">Search</button> */}
             </form>
           </div>
           <div className="head-search-fromimg">
@@ -51,14 +58,48 @@ function SearchPage() {
       </div>
       <div className="filter-wrap-search">
         <div className="filter-search">
-          <form>
+          <div className="filter">
             <select onChange={handleFilterChange}>
               <option >-</option>
               <option value="daily">daily</option>
               <option value="monthly">monthly</option>
               <option value="yearly">yearly</option>
             </select>
-          </form>
+          </div>
+          <div className='show-filter'>
+
+            {selectedFilter === 'daily' &&
+              <>
+                <form>
+                  <input type='date' max={maxDate}></input>
+                </form>
+              </>
+            }
+            {selectedFilter === 'monthly' &&
+              <>
+                <form>
+                  <input type='month' max={maxMonth}></input>
+                </form>
+              </>
+
+            }
+            {selectedFilter === 'yearly' &&
+              <>
+                <form>
+                  <select>
+                    <option >2019</option>
+                    <option >2020</option>
+                    <option >2021</option>
+                    <option >2022</option>
+                    <option >2023</option>
+                    <option value="2024">2024</option>
+                  </select>
+                </form>
+              </>
+            }
+
+          </div>
+
         </div>
       </div>
 

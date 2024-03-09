@@ -10,6 +10,7 @@ function BarChart() {
           xaxis: {
             categories: ["happy", "sad", "surprise", "angry", "natural", "disguss", "fear"]
           }
+
         },
         series: [
           {
@@ -24,7 +25,7 @@ function BarChart() {
         options={chartOptions.options}
         series={chartOptions.series}
         type="bar"
-        width="500px"
+        width="500"
       />
     </div>
   )
