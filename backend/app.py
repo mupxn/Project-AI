@@ -202,7 +202,7 @@ def get_records_from_today():
         return jsonify(formatted_records)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
-        return jsonify({"error": str(err)}), 500
+        # return jsonify({"error": str(err)}), 500
     
 
         
