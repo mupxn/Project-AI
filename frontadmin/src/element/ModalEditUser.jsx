@@ -5,19 +5,10 @@ import axios from "axios";
 function ModalEditUser({ onClose, userId, userName, action }) {
     const [isEdit, setIsEdit] = useState(false)
     const [name, setName] = useState('');
-    const edited = () => setIsEdit(true)
-    useEffect(() => {
-        fetchData();
-    }, [])
-    const fetchData = () => {
-        axios.get(`http://localhost:5000/api/user/${userId}`)
-            .then(response => {
-                setName(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
-    };
+    const edited = () => {
+        setIsEdit(true)
+        setName(userName)
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(name);
@@ -46,7 +37,7 @@ function ModalEditUser({ onClose, userId, userName, action }) {
                         <div className="modal-content-edit">
                             <div className="user-info-edit">
                                 <div className='section-edit'>Name :</div>
-                                <div>{name}</div>
+                                <div>{userName}</div>
                             </div>
                         </div>
                         <div className="modal-footer-edit">
