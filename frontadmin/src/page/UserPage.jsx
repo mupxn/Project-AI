@@ -1,48 +1,62 @@
-import React, { Children, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
 import './UserPage.css'
-import data from '../data.json'
 import ModalDeleteUser from '../element/ModalDeleteUser';
 import ModalAddUser from '../element/ModalAddUser';
 import ModalEditUser from '../element/ModalEditUser';
-import img from "../img/testimg.jpeg"
-const users = data.User
-const itemsPerPage = 5;
-// pagination / edit image /crop image
-function UserPage() {
-  const [selected,setSelected] = useState(null)
-  //modal add user
-  const [isModalAddUser, setIsModalAddUser] = useState(false);
-  //modal delete
-  const [isModalDeleteUser, setIsModalDeleteUser] = useState(false)
-  //edit state
-  const [isModalEditUser, setIsModalEditUser] = useState(false)
+import img from "../img/testimg.jpeg";
+import axios from 'axios';
 
-  const openModalEditUser = (userID) => {
+function UserPage() {
+
+  const [users, setUsers] = useState([]) //map user from database
+  const [selected, setSelected] = useState(null) //set userID when click button
+  const [selectedName, setSelectedName] = useState(null) //set Name when click button  
+  const [isModalAddUser, setIsModalAddUser] = useState(false); //modal add user
+  const [isModalDeleteUser, setIsModalDeleteUser] = useState(false) //modal delete
+  const [isModalEditUser, setIsModalEditUser] = useState(false) //modal edit
+  const [searchQuery, setSearchQuery] = useState('');
+//edit
+  const openModalEditUser = (userID,userName) => {
     setIsModalEditUser(true)
     setSelected(userID)
+    setSelectedName(userName)
   }
   const closeModalEditUser = () => setIsModalEditUser(false)
-
-  const openModalDelelteUser = (userID) => {
+//delete
+  const openModalDelelteUser = (userID,userName) => {
     setIsModalDeleteUser(true);
     setSelected(userID)
+    setSelectedName(userName)
   }
   const closeModalDelelteUser = () => setIsModalDeleteUser(false);
-
+//add
   const openModalAddUser = () => setIsModalAddUser(true);
   const closeModalAddUser = () => setIsModalAddUser(false);
-
-  const [searchQuery, setSearchQuery] = useState('');
+//search
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
   };
-  
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/user');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleUserAction = () => {
+    fetchData();
+  };
   return (
     <div className='user'>
       <div className='head-wrap'>
@@ -74,8 +88,6 @@ function UserPage() {
             <div className="th id">ID</div>
             <div className="th profile">profile</div>
             <div className="th name">ชื่อ-นามสกุล</div>
-            <div className="th gender">เพศ</div>
-            <div className="th age">อายุ</div>
             <div className="th edit">แก้ไข</div>
             <div className="th delete">ลบ</div>
           </div>
@@ -83,16 +95,14 @@ function UserPage() {
         <div className="table-body">
           {users.map(user => (
             <div className='tr' key={user.UserID}>
-              <div className="td id">{user.UserID}</div>
-              <div className="td profile" ><img src={img} style={{width:"40px",height:"40px"}}/></div>
+              <div className="td id">{user.ID}</div>
+              <div className="td profile" ><img src={`../../image/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
               <div className="td name">{user.Name}</div>
-              <div className="td gender">{user.Gender}</div>
-              <div className="td age">{user.Age}</div>
               <div className="td edit">
-                <button className="edit-user" onClick={() => openModalEditUser(user.UserID)}>แก้ไข</button>
+                <button className="edit-user" onClick={() => openModalEditUser(user.ID,user.Name)}>แก้ไข</button>
               </div>
               <div className="td delete">
-                <button className="delete-user" onClick={() => openModalDelelteUser(user.UserID)}>ลบ</button>
+                <button className="delete-user" onClick={() => openModalDelelteUser(user.ID,user.Name)}>ลบ</button>
               </div>
             </div>
           ))}
@@ -100,15 +110,15 @@ function UserPage() {
       </div>
 
       {isModalDeleteUser && (
-        <ModalDeleteUser onClose={closeModalDelelteUser} userId={selected}/>
+        <ModalDeleteUser onClose={closeModalDelelteUser} userId={selected} userName={selectedName} action={handleUserAction} />
       )}
 
       {isModalAddUser && (
-        <ModalAddUser onClose={closeModalAddUser}/>
+        <ModalAddUser onClose={closeModalAddUser} />
       )}
 
       {isModalEditUser && (
-        <ModalEditUser onClose={closeModalEditUser} userId={selected}/>
+        <ModalEditUser onClose={closeModalEditUser} userId={selected} userName={selectedName} action={handleUserAction} />
       )}
     </div >
   )

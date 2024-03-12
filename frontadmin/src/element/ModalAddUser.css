@@ -25,7 +25,8 @@
     cursor: pointer;
     /* justify-content: space-between; */
 }
-.btn-submit{
+
+input[type="submit"]{
     background-color: #42a942;
 }
 .btn-cancel{

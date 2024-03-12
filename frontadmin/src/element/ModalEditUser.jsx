@@ -1,19 +1,40 @@
 import React, { useState, useEffect } from 'react'
 import "./ModalEditUser.css"
-import data from '../data.json'
-function ModalEditUser({ onClose, userId }) {
-    const [isEdit, setIsEdit] = useState(false)
-    const [maxDate, setMaxDate] = useState('');
-    const edited = () => setIsEdit(true)
+import axios from "axios";
 
+function ModalEditUser({ onClose, userId, userName, action }) {
+    const [isEdit, setIsEdit] = useState(false)
+    const [name, setName] = useState('');
+    const edited = () => setIsEdit(true)
     useEffect(() => {
-        const today = new Date().toISOString().split('T')[0];
-        setMaxDate(today);
-    }, []);
-    function print() {
-        console.log(userId);
+        fetchData();
+    }, [])
+    const fetchData = () => {
+        axios.get(`http://localhost:5000/api/user/${userId}`)
+            .then(response => {
+                setName(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log(name);
+        await axios.put(`http://localhost:5000/api/user/${userId}/update`, { name })
+            .then(response => {
+                setName(response.data);
+                action();
+                onClose();
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });    
     }
-    const users = data.User
+    const handleInputChange = (e) => {
+        setName(e.target.value);
+    };
+
     return (
         <div className='modal-container-edit'>
             <div className="modal-edit">
@@ -25,7 +46,7 @@ function ModalEditUser({ onClose, userId }) {
                         <div className="modal-content-edit">
                             <div className="user-info-edit">
                                 <div className='section-edit'>Name :</div>
-                                <div>noey</div>
+                                <div>{name}</div>
                             </div>
                         </div>
                         <div className="modal-footer-edit">
@@ -35,15 +56,15 @@ function ModalEditUser({ onClose, userId }) {
                     </>
                 ) : (
                     <>
-                        <form>
+                        <form onSubmit={handleSubmit}>
                             <div className="modal-content-edit">
                                 <div className="user-info-edit">
                                     <label className='section-edit'>Name :</label>
-                                    <input type='text' id='name' />
+                                    <input type='text' value={name} onChange={handleInputChange}/>
                                 </div>
                             </div>
                             <div className="modal-footer-edit">
-                                <input type="submit" className='btn btn-submit' value="Submit" />
+                                <input type="submit" className='btn btn-submit' value="Submit"/>
                                 <button className='btn btn-cancel' onClick={onClose}>Cancel</button>
                             </div>
                         </form>

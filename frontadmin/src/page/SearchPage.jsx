@@ -4,17 +4,25 @@ import "./SearchPage.css"
 import data from '../data.json'
 import img from "../img/testimg.jpeg"
 import ModalBgImage from '../element/ModalBgImage';
+import axios from "axios";
 const users = data.User
 
 function SearchPage() {
+  const [detection,setDetection] = useState([])
   const [maxDate, setMaxDate] = useState('');
   const [maxMonth, setMaxMonth] = useState('');
   const [isModalChooseImg, setIsModalChooseImg] = useState(false)
   const [isModalBGImg, setIsModalBGImg] = useState(false)
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('')
+  const [selectDetect, setSelectDetect] = useState('')
+  const handleBGImage=(ID)=>{
+    setIsModalBGImg(true)
+    setSelectDetect(ID)
+  }
   const openModalChooseImg = () => setIsModalChooseImg(true)
   const closeModalChooseImg = () => setIsModalChooseImg(false)
-  const [selectedFilter, setSelectedFilter] = useState('')
+  
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -35,6 +43,18 @@ function SearchPage() {
     setMaxMonth(maxMonthValue);
     setMaxDate(maxDateValue);
   }, []);
+  useEffect(() => {
+    const fetchData = () => {
+      axios.get('http://localhost:5000/api/detect')
+        .then(response => {
+          setDetection(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    };
+    fetchData();
+  },[])
   return (
     <div className='search'>
       <div className="head-search-wrap">
@@ -67,7 +87,6 @@ function SearchPage() {
             </select>
           </div>
           <div className='show-filter'>
-
             {selectedFilter === 'daily' &&
               <>
                 <form>
@@ -97,9 +116,7 @@ function SearchPage() {
                 </form>
               </>
             }
-
           </div>
-
         </div>
       </div>
 
@@ -118,18 +135,18 @@ function SearchPage() {
           </div>
         </div>
         <div className="table-body">
-          {users.map(user => (
-            <div className='tr' key={user.UserID}>
-              <div className="td idDetect" >1</div>
-              <div className="td name">{user.Name}</div>
-              <div className="td gender">{user.Gender}</div>
-              <div className="td age">{user.Age}</div>
-              <div className="th feel">อารมณ์</div>
-              <div className="th date">วันที่</div>
-              <div className="th time">เวลา</div>
-              <div className="td faceimg"><img src={img} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
+          {detection.map(item => (
+            <div className='tr' key={item.DetectID}>
+              <div className="td idDetect">{item.ID}</div>
+              <div className="td name">{item.Name}</div>
+              <div className="td gender">{item.Gender}</div>
+              <div className="td age">{item.Age}</div>
+              <div className="th feel">{item.EmoName}</div>
+              <div className="th date">{item.Date}</div>
+              <div className="th time">{item.Time}</div>
+              <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
               <div className="td bgimg">
-                <button onClick={() => setIsModalBGImg(true)}><img src={img} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                <button onClick={() => handleBGImage(item.ID)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
               </div>
             </div>
           ))}
@@ -137,7 +154,7 @@ function SearchPage() {
       </div>
 
       {isModalBGImg && (
-        <ModalBgImage onclose={() => setIsModalBGImg(false)} />
+        <ModalBgImage onclose={() => setIsModalBGImg(false)} DetectID={selectDetect} />
       )}
       {isModalChooseImg && (
         <ModalChooseImg onclose={closeModalChooseImg} />

@@ -25,3 +25,9 @@
     background-color: white;
     border: none;
 }
+@media screen and (max-width: 600px){
+    .modal-container-Bgimg{
+        width: calc(100% - 56px);
+        left: 56px;
+    }
+}

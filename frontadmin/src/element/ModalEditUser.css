@@ -9,10 +9,6 @@
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
 }
-/* .user-info{
-    display: flex;
-    justify-content: center;
-} */
 .modal-edit{
     background-color: white;
     border-radius: 0.5rem;
@@ -34,25 +30,20 @@
 .btn-cancel{
     background-color: #d9534f;
 }
-.section-edit{
-    padding-right: 10px;
-}
 .modal-content-edit{
-    /* background-color: #d9534f; */
     margin-bottom: 2rem;
-    /* display: block; */
 }
 .user-info-edit{
     display: flex;
     justify-content: center;
-    margin: 15px;
+    gap: 10px;
 }
 .modal-footer-edit{
     display: flex;
     justify-content: space-evenly;
 }
 @media screen and (max-width: 600px){
-    .modal-container{
+    .modal-container-edit{
         width: calc(100% - 56px);
         left: 56px;
     }

@@ -5,7 +5,7 @@ import HomePage from "./page/HomePage"
 import UserPage from "./page/UserPage"
 import SearchPage from './page/SearchPage';
 import Sidebar from './element/Sidebar';
-import ModalDeleteUser from './element/ModalDeleteUser';
+import LogInPage from "./page/LogInPage"
 function App() {
   return (
     <div className="App">
@@ -16,6 +16,7 @@ function App() {
             <Route path="/" element={<HomePage />}/>
             <Route path="/user" element={<UserPage />}/>
             <Route path="/search" element={<SearchPage />}/>
+            <Route path="/login" element={<LogInPage />}/>
           </Routes>
         </div>
       </div>
