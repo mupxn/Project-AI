@@ -1,21 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "./ModalAddUser.css"
-import data from '../data.json'
 import setCanvasPreview from './setCanvasPreview';
 import ReactCrop, { centerCrop, convertToPixelCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import axios from "axios";
 const ASPECT_RATIO = 1
 const MIN_DIMENSION = 100
-const users = data.User
-function ModalAddUser({ onClose }) {
-    const [maxDate, setMaxDate] = useState('');
+function ModalAddUser({ onClose, action }) {
     const [isImg, setIsImg] = useState(false)
-
+    const [newUser, setnewUser] = useState('')
+    const [newId, setnewId] = useState('')
     const imgRef = useRef(null)
     const previewCanvasRef = useRef(null)
     const [imgSrc, setImgSrc] = useState("")
     const [crop, setCrop] = useState()
     const [error, setError] = useState('')
+    const handleInputName = (e) => {
+        setnewUser(e.target.value)
+    }
+    const handleInputId = (e) => {
+        setnewId(e.target.value)
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log(newId);
+        console.log(newUser);
+        try {
+            await axios.post(`http://localhost:5000/api/user/adduser`,{newId,newUser});
+            action()
+            onClose()
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+    const showImage = () => {
+        console.log();
+    }
 
     const onSelectFile = (e) => {
         const file = e.target.files?.[0]
@@ -52,10 +72,6 @@ function ModalAddUser({ onClose }) {
         setCrop(centeredCrop)
     }
 
-    useEffect(() => {
-        const today = new Date().toISOString().split('T')[0];
-        setMaxDate(today);
-    }, []);
     return (
         <div className='modal-container-adduser'>
             <div className="modal-adduser">
@@ -65,10 +81,14 @@ function ModalAddUser({ onClose }) {
                             <h1>Add User</h1>
                         </div>
                         <div className="modal-content-adduser">
-                            <form>
-                                <div className="input-wrap">
+                            <form onSubmit={handleSubmit}>
+                                <div className="input-wrap id">
+                                    <label>ID :</label>
+                                    <input type='number' onChange={handleInputId} />
+                                </div>
+                                <div className="input-wrap name">
                                     <label>ชื่อ :</label>
-                                    <input type='text' id='name' />
+                                    <input type='text' onChange={handleInputName} />
                                 </div>
                                 <div className="input-wrap img">
                                     <button onClick={() => setIsImg(true)}>img</button>
@@ -83,76 +103,76 @@ function ModalAddUser({ onClose }) {
                 ) : (
                     <>
                         <div className="modal-header-search">
-                    <h1>Choose Img</h1>
-                </div>
+                            <h1>Choose Img</h1>
+                        </div>
 
-                <div className="modal-content-search">
-                    <div className="choose-file">
-                        <form>
-                            <input type='file' accept="image/*" onChange={onSelectFile} />
-                        </form>
-                    </div>
-                    {error && <p style={{ color: "red" }}>{error}</p>}
-                    <div className="content-img">
-                        <div className="img-before-crop">
-                            {imgSrc && (
-                                <div>
-                                    <ReactCrop
-                                        crop={crop}
-                                        onChange={
-                                            (percentCrop) => setCrop(percentCrop)
-                                        }
-                                        regtangleCrop
-                                        keepSelection
-                                        aspect={ASPECT_RATIO}
-                                        minWidth={MIN_DIMENSION}
-                                    >
-                                        <img
-                                            ref={imgRef}
-                                            src={imgSrc}
-                                            alt='Upload'
-                                            style={{ maxHeight: "50vh", marginBottom: "15px" }}
-                                            onLoad={onImageLoad}
-                                        />
-                                    </ReactCrop>
-                                    <button style={{ display: "block", margin: "0 auto" }} onClick={() => {
-                                        setCanvasPreview(
-                                            imgRef.current,
-                                            previewCanvasRef.current,
-                                            convertToPixelCrop(crop, imgRef.current.width, imgRef.current.height)
-                                        )
-                                    }}>Crop Image</button>
+                        <div className="modal-content-search">
+                            <div className="choose-file">
+                                <form>
+                                    <input type='file' accept="image/*" onChange={onSelectFile} />
+                                </form>
+                            </div>
+                            {error && <p style={{ color: "red" }}>{error}</p>}
+                            <div className="content-img">
+                                <div className="img-before-crop">
+                                    {imgSrc && (
+                                        <div>
+                                            <ReactCrop
+                                                crop={crop}
+                                                onChange={
+                                                    (percentCrop) => setCrop(percentCrop)
+                                                }
+                                                regtangleCrop
+                                                keepSelection
+                                                aspect={ASPECT_RATIO}
+                                                minWidth={MIN_DIMENSION}
+                                            >
+                                                <img
+                                                    ref={imgRef}
+                                                    src={imgSrc}
+                                                    alt='Upload'
+                                                    style={{ maxHeight: "50vh", marginBottom: "15px" }}
+                                                    onLoad={onImageLoad}
+                                                />
+                                            </ReactCrop>
+                                            <button style={{ display: "block", margin: "0 auto" }} onClick={() => {
+                                                setCanvasPreview(
+                                                    imgRef.current,
+                                                    previewCanvasRef.current,
+                                                    convertToPixelCrop(crop, imgRef.current.width, imgRef.current.height)
+                                                )
+                                            }}>Crop Image</button>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                                <div className="img-after-crop">
+                                    {crop && (
+                                        <canvas
+                                            ref={previewCanvasRef}
+                                            style={{
+                                                border: "1px solid black",
+                                                objectFit: "contain",
+                                                width: 150,
+                                                height: 150,
+                                            }}
+                                        />
+                                    )}
+                                </div>
+
+                            </div>
+
                         </div>
-                        <div className="img-after-crop">
-                            {crop && (
-                                <canvas
-                                    ref={previewCanvasRef}
-                                    style={{
-                                        border: "1px solid black",
-                                        objectFit: "contain",
-                                        width: 150,
-                                        height: 150,
-                                    }}
-                                />
-                            )}
+
+                        <div className="modal-footer-search">
+                            <div className="">
+                                <form>
+                                    <button className='btn btn-submit' onClick={() => setIsImg(false)}>submit</button>
+                                </form>
+                            </div>
+                            <div className="">
+                                <button className='btn btn-cancel' onClick={() => setIsImg(false)}>cancel</button>
+                            </div>
                         </div>
-
-                    </div>
-
-                </div>
-
-                <div className="modal-footer-search">
-                    <div className="">
-                        <form>
-                        <button className='btn btn-submit' onClick={() => setIsImg(false)}>submit</button>
-                        </form>
-                    </div>
-                    <div className="">
-                        <button className='btn btn-cancel' onClick={() => setIsImg(false)}>cancel</button>
-                    </div>
-                </div>
                     </>
                 )}
 

@@ -3,21 +3,21 @@ import "./ModalDeleteUser.css"
 import CheckmarkIcon from "../icon/CheckmarkIcon"
 import axios from "axios";
 
-function ModalDeleteUser({ onClose, userId, userName, action}) {
+function ModalDeleteUser({ onClose, userId, userName, action }) {
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [deleteUser,setDeleteUser] = useState('');
+    const [deleteUser, setDeleteUser] = useState('');
     const Submitted = () => setIsSubmitted(true)
-    function print(){
+    function print() {
         console.log(userId);
     }
-    const handleSubmit = async() => {
+    const handleSubmit = async () => {
         try {
-            await axios.post(`http://localhost:5000/api/user/${userId}/delete`);
+            await axios.get(`http://localhost:5000/api/user/${userId}/delete`);
             action()
             onClose()
-          } catch (error) {
+        } catch (error) {
             console.error('Error fetching data:', error);
-          }
+        }
     }
     return (
         <div className='modal-container-delete'>
@@ -39,9 +39,9 @@ function ModalDeleteUser({ onClose, userId, userName, action}) {
                     <>
                         <div className="modal-content-delete">
                             <div className='icon'>
-                                <CheckmarkIcon/>
+                                <CheckmarkIcon />
                             </div>
-                            
+
                         </div>
                         <div className="modal-footer-delete">
                             <button className='btn btn-ok' onClick={handleSubmit}>ok</button>

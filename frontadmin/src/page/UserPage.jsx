@@ -114,7 +114,7 @@ function UserPage() {
       )}
 
       {isModalAddUser && (
-        <ModalAddUser onClose={closeModalAddUser} />
+        <ModalAddUser onClose={closeModalAddUser} action={handleUserAction} />
       )}
 
       {isModalEditUser && (
