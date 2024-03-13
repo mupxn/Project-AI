@@ -3,6 +3,7 @@ import "./ModalChooseImg.css"
 import setCanvasPreview from './setCanvasPreview';
 import ReactCrop, { centerCrop, convertToPixelCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import axios from 'axios';
 const ASPECT_RATIO = 1
 const MIN_DIMENSION = 100
 function ModalChooseImg({ onclose }) {
@@ -46,6 +47,26 @@ function ModalChooseImg({ onclose }) {
         const centeredCrop = centerCrop(initialCrop, width, height)
         setCrop(centeredCrop)
     }
+
+    const sendPictureToBackend = async () => {
+        if (!imgSrc) return;
+
+        try {
+            if (crop) {
+                const pixelCrop = convertToPixelCrop(crop, imgRef.current.width, imgRef.current.height);
+                const croppedImage = previewCanvasRef.current.toDataURL();
+                await axios.post('http://localhost:5000/api/admin/search', { croppedImage });
+            } else {
+                const originalImage = imgSrc;
+                await axios.post('http://localhost:5000/api/admin/search', { originalImage });
+            }
+
+            console.log('Image uploaded successfully');
+        } catch (error) {
+            console.error('Error uploading image:', error);
+        }
+    };
+
     return (
         <div className='modal-container-search'>
             <div className="modal-search">
@@ -111,7 +132,7 @@ function ModalChooseImg({ onclose }) {
                 </div>
 
                 <div className="modal-footer-search">
-                    <div className="">
+                    <div className="" onSubmit={sendPictureToBackend}>
                         <form>
                             <input type="submit" className='btn btn-submit' value="Search" />
                         </form>
