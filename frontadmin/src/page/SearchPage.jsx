@@ -201,6 +201,25 @@ function SearchPage() {
           </div>
         </div>
         <div className="table-body">
+        {hasClick === false &&
+            <>
+              {detection.map(item => (
+                <div className='tr' key={item.DetectID}>
+                  <div className="td idDetect">{item.ID}</div>
+                  <div className="td name">{item.Name}</div>
+                  <div className="td gender">{item.Gender}</div>
+                  <div className="td age">{item.Age}</div>
+                  <div className="th feel">{item.EmoName}</div>
+                  <div className="th date">{item.Date}</div>
+                  <div className="th time">{item.Time}</div>
+                  <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
+                  <div className="td bgimg">
+                    <button onClick={() => handleBGImage(item.ID)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                  </div>
+                </div>
+              ))}
+            </>
+          }
           {hasClick === true && selectedFilter === 'daily' &&
             <>
               {filterDateDetection.map(item => (
