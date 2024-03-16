@@ -251,7 +251,7 @@ def get_data_barchart(filter):
         mydb.execute(sql,val)
         records = mydb.fetchall()
         categories = [record[0] for record in records]
-        series_data = [record[1] for record in records]
+        series_data = [int(record[1]) for record in records]
         data = {
         "categories": categories,
         "series": series_data
@@ -270,10 +270,10 @@ def get_data_piechart(filter):
         mydb.execute(sql,val)
         records = mydb.fetchall()
         labels_data = [record[0] for record in records]
-        series_data = [record[1] for record in records]
+        series_data = [int(record[1]) for record in records]
         data = {
-        "labels": labels_data,
-        "series": series_data
+        "series": series_data,
+        "labels": labels_data
         }
         return jsonify(data)
     except mysql.connector.Error as err:

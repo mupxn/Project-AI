@@ -29,7 +29,7 @@ function PieChart({ current, click, month }) {
     console.log(month);
     try {
       const response = await axios.get(`http://localhost:5000/api/home/piechart/${month}`);
-      const { labels, series } = response.data;
+      const { series, labels } = response.data;
       setChartData({
         series: series,
         options: {

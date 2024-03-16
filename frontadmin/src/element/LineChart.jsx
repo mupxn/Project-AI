@@ -23,7 +23,11 @@ function LineChart({ current, click, year }) {
         series: [
           {
             name: 'Series 1',
-            data: [30, 40, 45, 50, 49, 60]
+            data: [30, 40, 45, 50, 49, 60,30, 40, 45, 50, 49, 60]
+          },
+          {
+            name: 'Series 2',
+            data: [3, 20, 90, 23, 100,33,1, 5, 3, 4, 1, 7]
           }
         ]
       };
