@@ -41,6 +41,29 @@ def get_user():
         return jsonify(formatted_records)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
+        
+@app.route('/api/user/<string:search>')
+def get_user_search(search):
+    # Corrected SQL query with a single WHERE clause and an AND condition
+    query = """
+    SELECT user.UserID, user.Name FROM user WHERE user.UserID != 0 AND user.Name LIKE %s;
+    """
+    
+    try:
+        search_pattern = f"%{search}%"  # Prepare the search pattern
+        mydb.execute(query, (search_pattern,))  # Pass the search pattern as a tuple
+
+        records = mydb.fetchall()  # Fetch all matching records
+
+        if not records:
+            return jsonify({"message": "No records found."}), 404  # Return a 404 if no records found
+        
+        # Create a list of dictionaries for the found records to return as JSON
+        formatted_records = [{"ID": record[0], "Name": record[1]} for record in records]
+        return jsonify(formatted_records)
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({"error": str(err)})
     
 @app.route('/api/detect')
 def get_detection():
@@ -60,7 +83,35 @@ def get_detection():
     JOIN emotional ON emotionaltext.EmoID = emotional.EmoID;
     """
     try:
+        
         mydb.execute(query)
+        records = mydb.fetchall() 
+        formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
+        return jsonify(formatted_records)
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+@app.route('/api/detect/<string:search>')
+def get_detection_search(search):
+    query = """
+    SELECT detection.DetectID,
+    user.Name,
+    detection.Gender,
+    detection.Age,
+    emotional.EmoName,
+    DATE(detection.DateTime) AS Date,
+    TIME(detection.DateTime) AS Time,
+    detection.FaceDetect,
+    detection.BgDetect
+    FROM detection
+    JOIN user ON detection.UserID = user.UserID
+    JOIN emotionaltext ON detection.TextID = emotionaltext.TextID
+    JOIN emotional ON emotionaltext.EmoID = emotional.EmoID
+    AND user.Name LIKE %s;
+    """
+    try:
+        search_pattern = f"%{search}%"
+        mydb.execute(query, (search_pattern,))
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
@@ -78,6 +129,31 @@ def get_filterdate(filter):
         return jsonify(formatted_records)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
+
+@app.route('/api/detect/filter/date/<string:filter>/<string:search>')
+def get_filterdate_search(filter, search):
+    try:
+        search_pattern = f"%{search}%"  # Prepare the LIKE pattern
+        val = (filter, search_pattern)  # Correct tuple structure
+        sql = """
+        SELECT detection.DetectID, user.Name, detection.Gender, detection.Age, emotional.EmoName, DATE(detection.DateTime) AS Date, TIME(detection.DateTime) AS Time, detection.FaceDetect, detection.BgDetect 
+        FROM detection 
+        JOIN user ON detection.UserID = user.UserID 
+        JOIN emotionaltext ON detection.TextID = emotionaltext.TextID 
+        JOIN emotional ON emotionaltext.EmoID = emotional.EmoID 
+        WHERE DATE(detection.DateTime) = %s AND user.Name LIKE %s;
+        """
+        mydb.execute(sql, val)  # Pass the parameters correctly
+        records = mydb.fetchall()
+        if records:
+            formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
+            return jsonify(formatted_records)
+        else:
+            return jsonify({"message": "No records found."}), 404
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({"error": str(err)})
+
 
 @app.route('/api/detect/filter/month/<string:filter>')
 def get_filtermonth(filter):
