@@ -254,10 +254,7 @@ def get_data_barchart(filter):
         series_data = [record[1] for record in records]
         data = {
         "categories": categories,
-        "series": [{
-            "name": "Emotion Count",
-            "data": series_data
-        }]
+        "series": series_data
     }
         return jsonify(data)
     except mysql.connector.Error as err:

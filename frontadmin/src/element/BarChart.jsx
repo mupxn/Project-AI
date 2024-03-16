@@ -12,10 +12,7 @@ function BarChart({current, click, date}) {
         categories: []
       }
     },
-    series: [{
-      name: 'series-1',
-      data: []
-    }]
+    series: []
   });
   const barDataCurrentDate = async () => {
     try {
@@ -30,10 +27,13 @@ function BarChart({current, click, date}) {
             categories: categories,
           },
         },
-        series: series,
+        series: [{
+          name: "Series Name",
+          data: series
+        }]
       });
-      // console.log(categories);
-      // console.log(series);
+      console.log(categories);
+      console.log(series);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -51,10 +51,13 @@ function BarChart({current, click, date}) {
             categories: categories,
           },
         },
-        series: series,
+        series: [{
+          name: "Series Name",
+          data: series
+        }]
       });
-      // console.log(categories);
-      // console.log(series);
+      console.log(categories);
+      console.log(series);
     } catch (error) {
       console.error('Error fetching data:', error);
     }

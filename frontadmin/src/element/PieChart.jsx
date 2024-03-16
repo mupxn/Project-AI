@@ -4,11 +4,13 @@ import axios from "axios";
 import ChartComponent from "./ChartComponent.css"
 function PieChart({ current, click, month }) {
   const [chartData, setChartData] = useState({
+    // '1', '0', '1', '0', '0', '1'
     series: [],
     options: {
       chart: {
         type: 'pie',
       },
+      // 'fear', 'angry', 'neutral', 'surprise', 'sad', 'happy'
       labels: [],
       responsive: [{
         breakpoint: 480,
@@ -24,18 +26,19 @@ function PieChart({ current, click, month }) {
     },
   });
   const pieData = async () => {
-    // console.log(current);
+    console.log(month);
     try {
-      const response = await axios.get(`http://localhost:5000/api/home/piechart/${current}`);
+      const response = await axios.get(`http://localhost:5000/api/home/piechart/${month}`);
       const { labels, series } = response.data;
-      setChartData(prevData => ({
-        ...prevData,
+      setChartData({
         series: series,
         options: {
-          ...prevData.options,
+          ...chartData.options,
           labels: labels,
         },
-      }));
+      });
+      console.log(labels)
+      console.log(series)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
