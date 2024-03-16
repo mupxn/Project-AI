@@ -3,21 +3,8 @@ import './ModalBgImage.css'
 import CloseIcon from '../icon/CloseIcon'
 import axios from "axios";
 import img from '../img/testimg.jpeg'
-function ModalBgImage({ onclose, DetectID }) {
-    const [bgImage, setBgImage] = useState('');
+function ModalBgImage({ onclose, DetectBG }) {
     
-    useEffect(() => {
-        const fetchData = () => {
-            axios.get(`http://localhost:5000/api/detect/${DetectID}/bgimage`)
-                .then(response => {
-                    setBgImage(response.data);
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                });
-        };
-        fetchData();
-    }, [])
     return (
         <div className='modal-container-Bgimg'>
             <div className="modal-Bgimg">
@@ -27,7 +14,7 @@ function ModalBgImage({ onclose, DetectID }) {
                     </button>
                 </div>
                 <div className="Bg-img">
-                    <img src={`data:image/jpeg;base64,${bgImage}`} style={{ maxHeight: "30vh", objectFit: "cover" }} />
+                    <img src={`data:image/jpeg;base64,${DetectBG}`} style={{ maxHeight: "40vh", objectFit: "cover" }} />
                 </div>
             </div>
         </div>

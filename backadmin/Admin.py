@@ -103,28 +103,6 @@ def get_filteryear(filter):
     except mysql.connector.Error as err:
         print(f"Error: {err}")
 
-@app.route('/api/detect/<int:DetectID>/bgimage')
-def get_bgimage(DetectID):
-    query = f"SELECT detection.BgDetect FROM detection WHERE detection.DetectID = {DetectID};"
-    try:
-        mydb.execute(query)
-        records = mydb.fetchall() 
-        bg_image_data = records[0]
-        return jsonify(bg_image_data)
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-
-@app.route('/api/user/<int:userID>')
-def get_name(userID):
-    query = f"SELECT user.Name FROM user WHERE user.UserID = {userID};"
-    try:
-        mydb.execute(query)
-        records = mydb.fetchall() 
-        bg_image_data = records[0]
-        return jsonify(bg_image_data)
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-
 @app.route('/api/user/<int:userID>/update', methods=['PUT'])
 def update_name(userID):
     try:
@@ -164,6 +142,28 @@ def add_user():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({"message": "error"})    
+
+@app.route('/api/home/barchart/<string:filter>')
+def get_currentdata_barchart(filter):
+    try:
+        sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE(detection.DateTime) = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
+        val = (filter,)
+        # print("sql ;",sql)
+        mydb.execute(sql,val)
+        records = mydb.fetchall()
+        categories = [record[0] for record in records]
+        series_data = [record[1] for record in records]
+        data = {
+        "categories": categories,
+        "series": [{
+            "name": "Emotion Count",
+            "data": series_data
+        }]
+    }
+        return jsonify(data)
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({"message": "error"})   
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

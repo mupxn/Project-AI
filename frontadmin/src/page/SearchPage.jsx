@@ -16,10 +16,10 @@ function SearchPage() {
   const [isModalBGImg, setIsModalBGImg] = useState(false)
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('') // filter value click
-  const [selectDetect, setSelectDetect] = useState('')
-  const handleBGImage = (ID) => {
+  const [selectDetect, setSelectDetect] = useState('') //BG
+  const handleBGImage = (BG) => {
     setIsModalBGImg(true)
-    setSelectDetect(ID)
+    setSelectDetect(BG)
   }
   const openModalChooseImg = () => setIsModalChooseImg(true)
   const closeModalChooseImg = () => setIsModalChooseImg(false)
@@ -214,7 +214,7 @@ function SearchPage() {
                   <div className="th time">{item.Time}</div>
                   <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
                   <div className="td bgimg">
-                    <button onClick={() => handleBGImage(item.ID)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                    <button onClick={() => handleBGImage(item.BGDetect)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
                   </div>
                 </div>
               ))}
@@ -233,7 +233,7 @@ function SearchPage() {
                   <div className="th time">{item.Time}</div>
                   <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
                   <div className="td bgimg">
-                    <button onClick={() => handleBGImage(item.ID)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                    <button onClick={() => handleBGImage(item.BGDetect)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
                   </div>
                 </div>
               ))}
@@ -252,7 +252,7 @@ function SearchPage() {
                   <div className="th time">{item.Time}</div>
                   <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
                   <div className="td bgimg">
-                    <button onClick={() => handleBGImage(item.ID)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                    <button onClick={() => handleBGImage(item.BGDetect)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
                   </div>
                 </div>
               ))}
@@ -271,7 +271,7 @@ function SearchPage() {
                   <div className="th time">{item.Time}</div>
                   <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
                   <div className="td bgimg">
-                    <button onClick={() => handleBGImage(item.ID)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                    <button onClick={() => handleBGImage(item.BGDetect)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
                   </div>
                 </div>
               ))}
@@ -282,7 +282,7 @@ function SearchPage() {
       </div>
 
       {isModalBGImg && (
-        <ModalBgImage onclose={() => setIsModalBGImg(false)} DetectID={selectDetect} />
+        <ModalBgImage onclose={() => setIsModalBGImg(false)} DetectBG={selectDetect} />
       )}
       {isModalChooseImg && (
         <ModalChooseImg onclose={closeModalChooseImg} />

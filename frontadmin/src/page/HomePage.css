@@ -14,13 +14,13 @@
     margin-bottom: 30px;
     gap: 30px;
 }
-.filter-home{
+/* .filter-home{
     display: flex;
     gap: 20px;
 }
 .filter-wrap-home{
     margin-top: 10px;
-}
+} */
 @media screen and (max-width: 600px){
     .s-chart,.chart{
         display: block;

@@ -1,29 +1,77 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import ApexCharts from 'react-apexcharts';
+import axios from "axios";
 import ChartComponent from "./ChartComponent.css"
-function BarChart() {
-    const chartOptions = {
+function BarChart({current, click, date}) {
+  const [chartData, setChartData] = useState({
+    options: {
+      chart: {
+        id: 'basic-bar'
+      },
+      xaxis: {
+        categories: []
+      }
+    },
+    series: [{
+      name: 'series-1',
+      data: []
+    }]
+  });
+  const barDataCurrentDate = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/home/barchart/${current}`);
+      const { data } = response;
+      setChartData({
         options: {
-          chart: {
-            id: 'basic-bar'
-          },
+          ...chartData.options,
           xaxis: {
-            categories: ["happy", "sad", "surprise", "angry", "natural", "disguss", "fear"]
-          }
-
+            ...chartData.options.xaxis,
+            categories: data.categories,
+          },
         },
-        series: [
-          {
-            name: 'series-1',
-            data: [30, 40, 45, 50, 49, 60, 70]
-          }
-        ]
-      };
+        series: data.series,
+      });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  const barData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/home/barchart/${date}`);
+      const { data } = response;
+      setChartData({
+        options: {
+          ...chartData.options,
+          xaxis: {
+            ...chartData.options.xaxis,
+            categories: data.categories,
+          },
+        },
+        series: data.series,
+      });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Call the function if click is false show current date
+    if (!click) {
+      barDataCurrentDate()
+      console.log('Fetching data for current date:', current);
+    }
+    // Call the function if click is true show when date change
+    else if (click) {
+      barData()
+      console.log('Fetching data for date:', date);
+    }
+  }, [date, click]); // Now effect depends on date and click, it runs when either changes
+
   return (
     <div className="Bar">
       <ApexCharts
-        options={chartOptions.options}
-        series={chartOptions.series}
+        options={chartData.options}
+        series={chartData.series}
         type="bar"
         width="500"
       />

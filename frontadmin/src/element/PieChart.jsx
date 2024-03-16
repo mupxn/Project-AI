@@ -8,7 +8,7 @@ function PieChart() {
           chart: {
             type: 'donut',
           },
-          labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
+          labels: ["happy", "sad", "surprise", "natural", "angry", "fear"],
           responsive: [{
             breakpoint: 480,
             options: {

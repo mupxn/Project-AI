@@ -1,16 +1,38 @@
-import React,{useState,useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import './HomePage.css'
 import BarChart from "../element/BarChart.jsx";
 import PieChart from "../element/PieChart.jsx";
 import LineChart from "../element/LineChart.jsx";
+import axios from "axios";
 
 function HomePage() {
+  //useEffect ren after first render
+  const today = new Date()
+  const formattedDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
+  const [currentDate, setCurrentDate] = useState(formattedDate);
+
   const [maxDate, setMaxDate] = useState('');
   const [maxMonth, setMaxMonth] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('')
-  const handleFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setSelectedFilter(filterValue)
+  const [filterDate, setFilterDate] = useState('')
+  const [filterMonth, setFilterMonth] = useState('')
+  const [filterYear, setFilterYear] = useState('')
+  const [clickDate, setClickDate] = useState(false)
+  const [clickMonth, setClickMonth] = useState(false)
+  const [clickYear, setClickYear] = useState(false)
+  const handleFilterDate = async (e) => {
+    const updatedFilter = e.target.value;
+    setClickDate(true)
+    setFilterDate(updatedFilter)
+  }
+  const handleFilterMonth = async (e) => {
+    const updatedFilter = e.target.value;
+    setClickMonth(true)
+    setFilterMonth(updatedFilter)
+  }
+  const handleFilterYear = async (e) => {
+    const updatedFilter = e.target.value;
+    setClickYear(true)
+    setFilterYear(updatedFilter)
   }
   useEffect(() => {
     const today = new Date()
@@ -22,56 +44,38 @@ function HomePage() {
   return (
     <div className="Home">
       <div className="head-home">HomePage</div>
-      <div className="filter-wrap-home">
+
+      <div className="filter-home">
+        <div className="filter">
+          <form>
+            <input type='date' max={maxDate} onChange={handleFilterDate}></input>
+          </form>
+        </div>
+
         <div className="filter-home">
-          <div className="filter">
-            <select onChange={handleFilterChange}>
-              <option >-</option>
-              <option value="daily">daily</option>
-              <option value="monthly">monthly</option>
-              <option value="yearly">yearly</option>
+          <form>
+            <input type='month' max={maxMonth} onChange={handleFilterMonth}></input>
+          </form>
+        </div>
+
+        <div className="filter-home">
+          <form>
+            <select onChange={handleFilterYear}>
+              <option >2019</option>
+              <option >2020</option>
+              <option >2021</option>
+              <option >2022</option>
+              <option >2023</option>
+              <option value="2024">2024</option>
             </select>
-          </div>
-          <div className='show-filter'>
-
-            {selectedFilter === 'daily' &&
-              <>
-                <form>
-                  <input type='date' max={maxDate}></input>
-                </form>
-              </>
-            }
-            {selectedFilter === 'monthly' &&
-              <>
-                <form>
-                  <input type='month' max={maxMonth}></input>
-                </form>
-              </>
-
-            }
-            {selectedFilter === 'yearly' &&
-              <>
-                <form>
-                  <select>
-                    <option >2019</option>
-                    <option >2020</option>
-                    <option >2021</option>
-                    <option >2022</option>
-                    <option >2023</option>
-                    <option value="2024">2024</option>
-                  </select>
-                </form>
-              </>
-            }
-
-          </div>
-
+          </form>
         </div>
       </div>
+
       <div className="chart">
         <div className="s-chart">
           <div className="bar-chart">
-            <BarChart />
+            <BarChart current={currentDate} click={clickDate} date={filterDate}/>
           </div>
           <div className="pie-chart">
             <PieChart />
@@ -81,7 +85,6 @@ function HomePage() {
           <LineChart />
         </div>
       </div>
-
     </div>
 
   )
