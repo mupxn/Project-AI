@@ -4,7 +4,6 @@ import './UserPage.css'
 import ModalDeleteUser from '../element/ModalDeleteUser';
 import ModalAddUser from '../element/ModalAddUser';
 import ModalEditUser from '../element/ModalEditUser';
-import img from "../img/testimg.jpeg";
 import axios from 'axios';
 
 function UserPage() {
@@ -36,20 +35,28 @@ function UserPage() {
 //search
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+
   };
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
+    fetchData()
   };
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/user');
-      setUsers(response.data);
+      if (searchQuery === '') {
+        const response = await axios.get('http://localhost:5000/api/user');
+        setUsers(response.data);
+      } else {
+        const response = await axios.get(`http://localhost:5000/api/user/${searchQuery}`);
+        setUsers(response.data);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+
   useEffect(() => {
     fetchData();
   }, []);

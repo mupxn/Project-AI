@@ -7,9 +7,14 @@ import axios from "axios";
 function SearchPage() {
   const [hasClick, setHasClick] = useState(false)
   const [detection, setDetection] = useState([])
+  //filter
   const [filterDateDetection, setFilterDateDetection] = useState([])
   const [filterMonthDetection, setFilterMonthDetection] = useState([])
   const [filterYearDetection, setFilterYearDetection] = useState([])
+  //search
+  const [filterDateDetectionSearch, setFilterDateDetectionSearch] = useState([])
+  const [filterMonthDetectionSearch, setFilterMonthDetectionSearch] = useState([])
+  const [filterYearDetectionSearch, setFilterYearDetectionSearch] = useState([])
   const [maxDate, setMaxDate] = useState('');
   const [maxMonth, setMaxMonth] = useState('');
   const [isModalChooseImg, setIsModalChooseImg] = useState(false)
@@ -17,6 +22,8 @@ function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('') // filter value click
   const [selectDetect, setSelectDetect] = useState('') //BG
+  const [date, setDate] = useState('')
+  const [apiError, setApiError] = useState('');
   const handleBGImage = (BG) => {
     setIsModalBGImg(true)
     setSelectDetect(BG)
@@ -26,11 +33,14 @@ function SearchPage() {
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    console.log(searchQuery)
+    fetchData();
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
+    fetchData();
   };
   const handleFilterChange = (e) => {
     const filterValue = e.target.value;
@@ -48,9 +58,9 @@ function SearchPage() {
     }
   }
 
-  const handleFilter = async (e) => {
-    const updatedFilter = e.target.value;
-    console.log(hasClick);
+  const handleFilter = (e) => {
+    let updatedFilter = e.target.value;
+    setDate(updatedFilter)
     fetchData(updatedFilter);
   }
 
@@ -63,55 +73,103 @@ function SearchPage() {
     setMaxMonth(maxMonthValue);
     setMaxDate(maxDateValue);
     fetchData();
+    // const interval = setInterval(fetchData, 2000); 
+    // return () => clearInterval(interval); 
   }, []);
   const fetchData = async (updatedFilter) => {
-    // console.log(hasClick);
+    
     if (hasClick == false) {
-      await axios.get(`http://localhost:5000/api/detect`)
+      if(searchQuery === ""){
+        await axios.get(`http://localhost:5000/api/detect`)
         .then(response => {
           setDetection(response.data);
+          setApiError("null")
         })
         .catch(error => {
           console.error('Error fetching data:', error);
+          setApiError('No Data');
         });
+      }else{
+        await axios.get(`http://localhost:5000/api/detect/${searchQuery}`)
+        .then(response => {
+          console.log('first', response.data)
+          setDetection(response.data);
+          setApiError("null")
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          setApiError('No Data');
+        });
+      }
+      
     }
     else if (hasClick == true && selectedFilter === 'daily') {
-      try {
-        const response = await axios.get(`http://localhost:5000/api/detect/filter/date/${updatedFilter}`);
-        setFilterDateDetection(response.data)
-        // console.log(filter);
-      } catch (error) {
+    
+        if(searchQuery === ""){
+          await axios.get(`http://localhost:5000/api/detect/filter/date/${updatedFilter}`)
+        .then(response => {
+          setFilterDateDetection(response.data)
+          setApiError("null")
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          setApiError('No Data');
+        });
+        }else if(searchQuery !== ""){
+          await axios.get(`http://localhost:5000/api/detect/filter/date/${date}/${searchQuery}`)
+        .then(response => {
+          setFilterDateDetectionSearch(response.data)
+          setApiError("null")
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          setApiError('No Data');
+        });
+        }
+
+    }
+    else if (hasClick == true && selectedFilter === 'monthly') {
+      if(searchQuery === ""){
+        await axios.get(`http://localhost:5000/api/detect/filter/month/${date}`)
+      .then(response => {
+        setFilterMonthDetection(response.data)
+      })
+      .catch(error => {
         console.error('Error fetching data:', error);
+        setApiError('No Data');
+      });
+      }else if(searchQuery !== ""){
+        await axios.get(`http://localhost:5000/api/detect/filter/month/${date}/${searchQuery}`)
+      .then(response => {
+        setFilterMonthDetectionSearch(response.data)
+        setApiError("null")
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        setApiError('No Data');
+      });
       }
     }
-    else if (hasClick == true && selectedFilter === 'monthly') {
-      console.log("อิอิ");
-        try {
-          const response = await axios.get(`http://localhost:5000/api/detect/filter/month/${updatedFilter}`);
-          setFilterMonthDetection(response.data)
-          // console.log(filter);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-    }
-    else if (hasClick == true && selectedFilter === 'monthly') {
-      console.log("อิอิ");
-        try {
-          const response = await axios.get(`http://localhost:5000/api/detect/filter/month/${updatedFilter}`);
-          setFilterMonthDetection(response.data)
-          // console.log(filter);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-    }
     else if (hasClick == true && selectedFilter === 'yearly') {
-      console.log("อิอิ");
-        try {
-          const response = await axios.get(`http://localhost:5000/api/detect/filter/year/${updatedFilter}`);
+        if(searchQuery === ""){
+          await axios.get(`http://localhost:5000/api/detect/filter/year/${updatedFilter}`)
+        .then(response => {
           setFilterYearDetection(response.data)
-          // console.log(filter);
-        } catch (error) {
+        })
+        .catch(error => {
           console.error('Error fetching data:', error);
+          setApiError('No Data');
+        });
+        }else if(searchQuery !== ""){
+          await axios.get(`http://localhost:5000/api/detect/filter/year/${date}/${searchQuery}`)
+        .then(response => {
+          setFilterYearDetectionSearch(response.data)
+          setApiError("null")
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          setApiError('No Data');
+        });
         }
     }
   };
@@ -201,7 +259,7 @@ function SearchPage() {
           </div>
         </div>
         <div className="table-body">
-        {hasClick === false &&
+        {hasClick === false && apiError == "null" &&
             <>
               {detection.map(item => (
                 <div className='tr' key={item.DetectID}>
@@ -220,8 +278,8 @@ function SearchPage() {
               ))}
             </>
           }
-          {hasClick === true && selectedFilter === 'daily' &&
-            <>
+          {hasClick === true && selectedFilter === 'daily' && searchQuery === '' &&
+            <> 
               {filterDateDetection.map(item => (
                 <div className='tr' key={item.DetectID}>
                   <div className="td idDetect">{item.ID}</div>
@@ -239,7 +297,26 @@ function SearchPage() {
               ))}
             </>
           }
-          {hasClick === true && selectedFilter === 'monthly' &&
+          {hasClick === true && selectedFilter === 'daily' && searchQuery !== '' &&
+            <> 
+              {filterDateDetectionSearch.map(item => (
+                <div className='tr' key={item.DetectID}>
+                  <div className="td idDetect">{item.ID}</div>
+                  <div className="td name">{item.Name}</div>
+                  <div className="td gender">{item.Gender}</div>
+                  <div className="td age">{item.Age}</div>
+                  <div className="th feel">{item.EmoName}</div>
+                  <div className="th date">{item.Date}</div>
+                  <div className="th time">{item.Time}</div>
+                  <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
+                  <div className="td bgimg">
+                    <button onClick={() => handleBGImage(item.BGDetect)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                  </div>
+                </div>
+              ))}
+            </>
+          }
+          {hasClick === true && selectedFilter === 'monthly' && searchQuery === '' &&
             <>
               {filterMonthDetection.map(item => (
                 <div className='tr' key={item.DetectID}>
@@ -258,9 +335,47 @@ function SearchPage() {
               ))}
             </>
           }
-          {hasClick === true && selectedFilter === 'yearly' &&
+          {hasClick === true && selectedFilter === 'monthly' && searchQuery !== '' &&
+            <>
+              {filterMonthDetectionSearch.map(item => (
+                <div className='tr' key={item.DetectID}>
+                  <div className="td idDetect">{item.ID}</div>
+                  <div className="td name">{item.Name}</div>
+                  <div className="td gender">{item.Gender}</div>
+                  <div className="td age">{item.Age}</div>
+                  <div className="th feel">{item.EmoName}</div>
+                  <div className="th date">{item.Date}</div>
+                  <div className="th time">{item.Time}</div>
+                  <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
+                  <div className="td bgimg">
+                    <button onClick={() => handleBGImage(item.BGDetect)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                  </div>
+                </div>
+              ))}
+            </>
+          }
+          {hasClick === true && selectedFilter === 'yearly' && searchQuery === '' &&
             <>
               {filterYearDetection.map(item => (
+                <div className='tr' key={item.DetectID}>
+                  <div className="td idDetect">{item.ID}</div>
+                  <div className="td name">{item.Name}</div>
+                  <div className="td gender">{item.Gender}</div>
+                  <div className="td age">{item.Age}</div>
+                  <div className="th feel">{item.EmoName}</div>
+                  <div className="th date">{item.Date}</div>
+                  <div className="th time">{item.Time}</div>
+                  <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>
+                  <div className="td bgimg">
+                    <button onClick={() => handleBGImage(item.BGDetect)}><img src={`data:image/jpeg;base64,${item.BGDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></button>
+                  </div>
+                </div>
+              ))}
+            </>
+          }
+          {hasClick === true && selectedFilter === 'yearly' && searchQuery !== '' &&
+            <>
+              {filterYearDetectionSearch.map(item => (
                 <div className='tr' key={item.DetectID}>
                   <div className="td idDetect">{item.ID}</div>
                   <div className="td name">{item.Name}</div>
