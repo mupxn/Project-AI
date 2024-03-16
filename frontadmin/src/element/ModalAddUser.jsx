@@ -158,9 +158,7 @@ function ModalAddUser({ onClose, action }) {
                                         />
                                     )}
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div className="modal-footer-search">

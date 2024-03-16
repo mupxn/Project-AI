@@ -9,8 +9,9 @@ function HomePage() {
   //useEffect ren after first render
   const today = new Date()
   const formattedDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
+  const formattedMonth = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0')
   const [currentDate, setCurrentDate] = useState(formattedDate);
-
+  const [currentMonth, setCurrentMonth] = useState(formattedMonth)
   const [maxDate, setMaxDate] = useState('');
   const [maxMonth, setMaxMonth] = useState('');
   const [filterDate, setFilterDate] = useState('')
@@ -78,11 +79,11 @@ function HomePage() {
             <BarChart current={currentDate} click={clickDate} date={filterDate}/>
           </div>
           <div className="pie-chart">
-            <PieChart />
+            <PieChart current={currentMonth} click={clickMonth} month={filterMonth}/>
           </div>
         </div>
         <div className="line-chart">
-          <LineChart />
+          <LineChart  click={clickYear} year={filterYear}/>
         </div>
       </div>
     </div>

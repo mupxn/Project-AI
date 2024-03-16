@@ -1,14 +1,15 @@
 import React from 'react'
 import ApexCharts from 'react-apexcharts';
+import axios from "axios";
 import ChartComponent from "./ChartComponent.css"
-function LineChart() {
+function LineChart({ current, click, year }) {
     const chartOptions = {
         options: {
           chart: {
             id: 'basic-line'
           },
           xaxis: {
-            categories: ["happy", "sad", "surprise", "natural", "angry", "fear"]
+            categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
           },
           stroke: {
             curve: 'smooth'
@@ -26,6 +27,42 @@ function LineChart() {
           }
         ]
       };
+      // const lineDataCurrentDate = async () => {
+      //   try {
+      //     const response = await axios.get(`http://localhost:5000/api/home/barchart/${current}`);
+      //     const { data } = response;
+      //     setChartData({
+      //       options: {
+      //         ...chartData.options,
+      //         xaxis: {
+      //           ...chartData.options.xaxis,
+      //           categories: data.categories,
+      //         },
+      //       },
+      //       series: data.series,
+      //     });
+      //   } catch (error) {
+      //     console.error('Error fetching data:', error);
+      //   }
+      // };
+      // const lineData = async () => {
+      //   try {
+      //     const response = await axios.get(`http://localhost:5000/api/home/barchart`);
+      //     const { data } = response;
+      //     setChartData({
+      //       options: {
+      //         ...chartData.options,
+      //         xaxis: {
+      //           ...chartData.options.xaxis,
+      //           categories: data.categories,
+      //         },
+      //       },
+      //       series: data.series,
+      //     });
+      //   } catch (error) {
+      //     console.error('Error fetching data:', error);
+      //   }
+      // };
   return (
     <div className="Line">
       <ApexCharts

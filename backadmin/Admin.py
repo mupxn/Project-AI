@@ -220,7 +220,7 @@ def add_user():
         return jsonify({"message": "error"})    
 
 @app.route('/api/home/barchart/<string:filter>')
-def get_currentdata_barchart(filter):
+def get_data_barchart(filter):
     try:
         sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE(detection.DateTime) = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
         val = (filter,)
@@ -236,6 +236,25 @@ def get_currentdata_barchart(filter):
             "data": series_data
         }]
     }
+        return jsonify(data)
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({"message": "error"})   
+
+@app.route('/api/home/piechart/<string:filter>')
+def get_data_piechart(filter):
+    try:
+        sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE_FORMAT(detection.DateTime, '%Y-%m') = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
+        val = (filter,)
+        # print("sql ;",sql)
+        mydb.execute(sql,val)
+        records = mydb.fetchall()
+        labels_data = [record[0] for record in records]
+        series_data = [record[1] for record in records]
+        data = {
+        "labels": labels_data,
+        "series": series_data
+        }
         return jsonify(data)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
