@@ -24,6 +24,8 @@ function SearchPage() {
   const [selectDetect, setSelectDetect] = useState('') //BG
   const [date, setDate] = useState('')
   const [apiError, setApiError] = useState('');
+  const [fetchMonth, setFetchMonth] = useState(false);
+  const [fetchYear, setFetchYear] = useState(false);
   const handleBGImage = (BG) => {
     setIsModalBGImg(true)
     setSelectDetect(BG)
@@ -77,7 +79,6 @@ function SearchPage() {
     // return () => clearInterval(interval); 
   }, []);
   const fetchData = async (updatedFilter) => {
-    
     if (hasClick == false) {
       if(searchQuery === ""){
         await axios.get(`http://localhost:5000/api/detect`)
@@ -104,35 +105,34 @@ function SearchPage() {
       
     }
     else if (hasClick == true && selectedFilter === 'daily') {
-    
         if(searchQuery === ""){
           await axios.get(`http://localhost:5000/api/detect/filter/date/${updatedFilter}`)
         .then(response => {
           setFilterDateDetection(response.data)
-          setApiError("null")
         })
         .catch(error => {
           console.error('Error fetching data:', error);
-          setApiError('No Data');
         });
         }else if(searchQuery !== ""){
           await axios.get(`http://localhost:5000/api/detect/filter/date/${date}/${searchQuery}`)
         .then(response => {
           setFilterDateDetectionSearch(response.data)
-          setApiError("null")
         })
         .catch(error => {
           console.error('Error fetching data:', error);
-          setApiError('No Data');
         });
         }
 
     }
     else if (hasClick == true && selectedFilter === 'monthly') {
       if(searchQuery === ""){
-        await axios.get(`http://localhost:5000/api/detect/filter/month/${date}`)
+        await axios.get(`http://localhost:5000/api/detect/filter/month/${updatedFilter}`)
       .then(response => {
-        setFilterMonthDetection(response.data)
+        if(fetchMonth === false){
+          setFilterMonthDetection(response.data)
+          console.log(response.data)
+          setFetchMonth(true)
+        }
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -152,7 +152,8 @@ function SearchPage() {
     }
     else if (hasClick == true && selectedFilter === 'yearly') {
         if(searchQuery === ""){
-          await axios.get(`http://localhost:5000/api/detect/filter/year/${updatedFilter}`)
+          if(fetchYear===false){
+            await axios.get(`http://localhost:5000/api/detect/filter/year/${updatedFilter}`)
         .then(response => {
           setFilterYearDetection(response.data)
         })
@@ -160,6 +161,9 @@ function SearchPage() {
           console.error('Error fetching data:', error);
           setApiError('No Data');
         });
+        setFetchYear(true)
+          }
+          
         }else if(searchQuery !== ""){
           await axios.get(`http://localhost:5000/api/detect/filter/year/${date}/${searchQuery}`)
         .then(response => {
