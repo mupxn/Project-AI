@@ -5,7 +5,7 @@ import axios from "axios";
 const FaceDetect = () => {
 
   const [detect, setDetection] = useState([]);
-  const fetchInterval = 500;
+  const fetchInterval = 1500;
   const EmotionColor = {
     happy: '#FDFD96',
     sad: '#B2CEFE',
@@ -17,7 +17,7 @@ const FaceDetect = () => {
 
   useEffect(() => {
     const fetchData = () => {
-      axios.get('http://localhost:5000/user/showresult')
+      axios.get('http://localhost:5001/user/showresult')
         .then(response => {
           setDetection(response.data); 
         })
@@ -38,7 +38,7 @@ const FaceDetect = () => {
     <div className="container">
       <div className="video-container">
         <img
-          src="http://localhost:5000//video_feed"
+          src="http://localhost:5001//video_feed"
           style={{ borderRadius: "10px" }}
           className="img"
         />
