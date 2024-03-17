@@ -10,6 +10,7 @@ from PIL import Image
 from io import BytesIO
 from deepface import DeepFace
 import numpy as np
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app)
@@ -239,10 +240,11 @@ def add_user():
     try:
         new_id = request.json.get('newId')
         new_user = request.json.get('newUser')
+        image_file = request.files['image']
         sql = ("INSERT INTO user(user.UserID,user.Name) VALUES (%s,%s);")
         val = (new_id,new_user)
-        print("sql ;",sql)
-        print("val ;",val)
+        print("sql ;",image_file)
+        # print("val ;",val)
         mydb.execute(sql,val)
         connection.commit()
         return jsonify({"message": "User deleted successfully"})
@@ -315,7 +317,6 @@ def emotion_data():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({"message": "error"})
-    
 
 
 @app.route('/api/admin/search', methods=['POST'])
@@ -330,7 +331,7 @@ def process_image():
         if uploaded_image is None:
             return jsonify({'error': 'Uploaded image is corrupt or in an unsupported format'}), 400
 
-        db_path = os.path.join(os.path.dirname(__file__), "data_set", "user")
+        db_path = r"data_set/user"
         print(db_path)
         results = DeepFace.find(uploaded_image, db_path=db_path, enforce_detection=False)
         if results and not results[0].empty:

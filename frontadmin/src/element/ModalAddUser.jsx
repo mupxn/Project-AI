@@ -20,19 +20,46 @@ function ModalAddUser({ onClose, action }) {
     }
     const handleInputId = (e) => {
         setnewId(e.target.value)
+        console.log(e.target.value);
     }
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        console.log(newId);
-        console.log(newUser);
-        try {
-            await axios.post(`http://localhost:5000/api/user/adduser`,{newId,newUser});
-            action()
-            onClose()
-        } catch (error) {
-            console.error('Error fetching data:', error);
+        e.preventDefault(); // Prevent default form submission behavior
+    
+        if (!imgSrc) {
+            console.log("No image source found.");
+            return; // Exit if there is no image to work with
         }
-    }
+    
+        const formData = new FormData();
+        formData.append('newId', newId); // Append user ID
+        formData.append('newUser', newUser); // Append user name
+    
+        if (crop && previewCanvasRef && previewCanvasRef.current) {
+            // Assuming setCanvasPreview correctly updates the canvas to display the cropped image
+            const blob = await new Promise(resolve => previewCanvasRef.current.toBlob(resolve, 'image/jpeg'));
+            formData.append('image', blob, 'cropped-image.jpg');
+        } else {
+            // This branch seems to handle the case where no cropping has occurred,
+            // but in your current setup, it might never be used since cropping setup is always initiated.
+            console.log('No crop data available');
+        }
+    
+        try {
+            // Make sure the URL matches your server's endpoint and it's accessible from the client
+            const response = await axios.post('http://localhost:5000/api/user/adduser', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+    
+            console.log('Server response:', response.data);
+            action(); // Callback to refresh or update parent component state
+            onClose(); // Close modal or reset component state
+        } catch (error) {
+            console.error('Error submitting form data:', error);
+        }
+    };
+    
     const showImage = () => {
         console.log();
     }
@@ -94,7 +121,7 @@ function ModalAddUser({ onClose, action }) {
                                     <button onClick={() => setIsImg(true)}>img</button>
                                 </div>
                                 <div className="modal-footer-adduser">
-                                    <input type="submit" className='btn btn-submit' value="Submit" />
+                                    <input type="submit" className='btn btn-submit' value="Submit"/>
                                     <button className='btn btn-cancel' onClick={onClose}>Cancel</button>
                                 </div>
                             </form>
