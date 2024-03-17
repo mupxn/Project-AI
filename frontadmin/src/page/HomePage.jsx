@@ -45,45 +45,27 @@ function HomePage() {
   return (
     <div className="Home">
       <div className="head-home">HomePage</div>
-
-      <div className="filter-home">
-        <div className="filter">
-          <form>
-            <input type='date' max={maxDate} onChange={handleFilterDate}></input>
-          </form>
-        </div>
-
-        <div className="filter-home">
-          <form>
-            <input type='month' max={maxMonth} onChange={handleFilterMonth}></input>
-          </form>
-        </div>
-
-        <div className="filter-home">
-          <form>
-            <select onChange={handleFilterYear}>
-              <option >2019</option>
-              <option >2020</option>
-              <option >2021</option>
-              <option >2022</option>
-              <option >2023</option>
-              <option value="2024">2024</option>
-            </select>
-          </form>
-        </div>
-      </div>
-
       <div className="chart">
         <div className="s-chart">
           <div className="bar-chart">
-            <BarChart current={currentDate} click={clickDate}date={filterDate} />
+            <div className="filter">
+              <form>
+                <input type='date' max={maxDate} onChange={handleFilterDate}></input>
+              </form>
+            </div>
+            <BarChart current={currentDate} click={clickDate} date={filterDate} />
           </div>
           <div className="pie-chart">
-            <PieChart current={currentMonth} click={clickMonth} month={filterMonth}/>
+            <div className="filter-home">
+              <form>
+                <input type='month' max={maxMonth} onChange={handleFilterMonth}></input>
+              </form>
+            </div>
+            <PieChart current={currentMonth} click={clickMonth} month={filterMonth} />
           </div>
         </div>
         <div className="line-chart">
-          <LineChart  click={clickYear} year={filterYear}/>
+          <LineChart />
         </div>
       </div>
     </div>

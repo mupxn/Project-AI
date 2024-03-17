@@ -92,7 +92,7 @@ function BarChart({current, click, date}) {
 
   return (
     <div className="Bar">
-      <button onClick={showclick}></button>
+      {/* <button onClick={showclick}></button> */}
       <ApexCharts
         options={chartData.options}
         series={chartData.series}

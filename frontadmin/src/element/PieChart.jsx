@@ -26,7 +26,7 @@ function PieChart({ current, click, month }) {
     },
   });
   const pieData = async () => {
-    console.log(month);
+    // console.log(month);
     try {
       const response = await axios.get(`http://localhost:5000/api/home/piechart/${month}`);
       const { series, labels } = response.data;
