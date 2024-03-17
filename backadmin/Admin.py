@@ -1,8 +1,14 @@
+import base64
+import cv2
 from flask import Flask, jsonify, Response,request
 from flask_cors import CORS
 import json
 import mysql.connector
 from datetime import timedelta
+from PIL import Image
+from io import BytesIO
+from deepface import DeepFace
+import numpy as np
 
 app = Flask(__name__)
 CORS(app)
@@ -308,6 +314,70 @@ def emotion_data():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({"message": "error"})
+    
+
+@app.route('/api/admin/search', methods=['POST'])
+def process_image():
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image found in request'}), 400
+
+        image_file = request.files['image']
+        image_np = np.frombuffer(image_file.read(), np.uint8)
+        uploaded_image = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+        if uploaded_image is None:
+            return jsonify({'error': 'Uploaded image is corrupt or in an unsupported format'}), 400
+
+        query = """
+        SELECT detection.DetectID,
+               user.Name,
+               detection.Gender,
+               detection.Age,
+               emotional.EmoName,
+               DATE(detection.DateTime) AS Date,
+               TIME(detection.DateTime) AS Time,
+               detection.FaceDetect,
+               detection.BgDetect
+        FROM detection
+        JOIN user ON detection.UserID = user.UserID
+        JOIN emotionaltext ON detection.TextID = emotionaltext.TextID
+        JOIN emotional ON emotionaltext.EmoID = emotional.EmoID;
+        """
+        mydb.execute(query)
+        records = mydb.fetchall()
+
+        results = []
+
+        for record in records:
+            try:
+                bg_image_data = base64.b64decode(record[8])
+                bg_image = Image.open(BytesIO(bg_image_data))
+                bg_image_cv = cv2.cvtColor(np.array(bg_image), cv2.COLOR_RGB2BGR)
+            except Exception as e:
+                print(f"Error processing record: {e}")
+                continue  # Skip this record
+
+        
+            verification_result = DeepFace.verify(uploaded_image, bg_image_cv, enforce_detection=False) 
+
+            if verification_result:
+                results.append({
+                    'record': {
+                        "ID": record[0],
+                        "Name": record[1],
+                        "Gender": record[2],
+                        "Age": record[3],
+                        "EmoName": record[4],
+                        "Date": str(record[5]),
+                        "Time": str(record[6]),
+                        "FaceDetect": record[7],
+                        "BGDetect": record[8]
+                    }
+                })
+
+        return jsonify(results), 200
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 
 if __name__ == '__main__':

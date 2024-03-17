@@ -26,12 +26,21 @@ function SearchPage() {
   const [apiError, setApiError] = useState('');
   const [fetchMonth, setFetchMonth] = useState(false);
   const [fetchYear, setFetchYear] = useState(false);
+  const [statusSearchPho, setStatusSearchPho] = useState(false);
+  const [imageData, setImageData] = useState(null);
   const handleBGImage = (BG) => {
     setIsModalBGImg(true)
     setSelectDetect(BG)
   }
   const openModalChooseImg = () => setIsModalChooseImg(true)
   const closeModalChooseImg = () => setIsModalChooseImg(false)
+
+  const searchPhoto = () => {setHasClick(false),setStatusSearchPho(true)}
+  const handleImageData = (data) => {
+    setImageData(data);
+    console.log('Received image data:', data);
+};
+
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -55,7 +64,6 @@ function SearchPage() {
     else if (filterValue == '-') {
       setSelectedFilter('')
       setHasClick(false)
-
       console.log(hasClick);
     }
   }
@@ -79,7 +87,7 @@ function SearchPage() {
     // return () => clearInterval(interval); 
   }, []);
   const fetchData = async (updatedFilter) => {
-    if (hasClick == false) {
+    if (hasClick == false && statusSearchPho == false) {
       if(searchQuery === ""){
         await axios.get(`http://localhost:5000/api/detect`)
         .then(response => {
@@ -404,7 +412,7 @@ function SearchPage() {
         <ModalBgImage onclose={() => setIsModalBGImg(false)} DetectBG={selectDetect} />
       )}
       {isModalChooseImg && (
-        <ModalChooseImg onclose={closeModalChooseImg} />
+        <ModalChooseImg onclose={closeModalChooseImg} onsearch = {searchPhoto} onImageData={handleImageData} />
       )}
     </div>
   )

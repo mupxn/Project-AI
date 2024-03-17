@@ -6,7 +6,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import axios from 'axios';
 const ASPECT_RATIO = 1
 const MIN_DIMENSION = 100
-function ModalChooseImg({ onclose }) {
+function ModalChooseImg({ onclose, onsearch, onImageData }) {
     const imgRef = useRef(null)
     const previewCanvasRef = useRef(null)
     const [imgSrc, setImgSrc] = useState("")
@@ -50,18 +50,26 @@ function ModalChooseImg({ onclose }) {
 
     const sendPictureToBackend = async () => {
         if (!imgSrc) return;
-
+    
+        let imageData = {};
+        if (crop) {
+            // Assuming convertToPixelCrop and other variables are properly defined elsewhere
+            const croppedImage = previewCanvasRef.current.toDataURL('image/jpeg');
+            imageData = { image: croppedImage };
+        } else {
+            const originalImage = imgSrc;
+            imageData = { image: originalImage };
+        }
+    
         try {
-            if (crop) {
-                const pixelCrop = convertToPixelCrop(crop, imgRef.current.width, imgRef.current.height);
-                const croppedImage = previewCanvasRef.current.toDataURL();
-                await axios.post('http://localhost:5000/api/admin/search', { croppedImage });
-            } else {
-                const originalImage = imgSrc;
-                await axios.post('http://localhost:5000/api/admin/search', { originalImage });
-            }
-
-            console.log('Image uploaded successfully');
+            const response = await axios.post('http://localhost:5000/api/admin/search', imageData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            console.log('Image uploaded successfully', response.data);
+            onImageData(response.data);
+            onsearch();
         } catch (error) {
             console.error('Error uploading image:', error);
         }
@@ -132,8 +140,8 @@ function ModalChooseImg({ onclose }) {
                 </div>
 
                 <div className="modal-footer-search">
-                    <div className="" onSubmit={sendPictureToBackend}>
-                        <form>
+                    <div className="">
+                        <form onSubmit={sendPictureToBackend}>
                             <input type="submit" className='btn btn-submit' value="Search" />
                         </form>
                     </div>
