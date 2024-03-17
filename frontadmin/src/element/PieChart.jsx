@@ -3,7 +3,7 @@ import ApexCharts from 'react-apexcharts';
 import axios from "axios";
 import ChartComponent from "./ChartComponent.css"
 function PieChart({ current, click, month }) {
-  const [chartData, setChartData] = useState({
+  const [chartDataPie, setChartDataPie] = useState({
     // '1', '0', '1', '0', '0', '1'
     series: [],
     options: {
@@ -31,10 +31,10 @@ function PieChart({ current, click, month }) {
       const response = await axios.get(`http://localhost:5000/api/home/piechart/${month}`);
       const { series, labels } = response.data;
       if (labels && series){
-        setChartData({
+        setChartDataPie({
           series: series,
           options: {
-            ...chartData.options,
+            ...chartDataPie.options,
             labels: labels,
           },
         });
@@ -52,40 +52,36 @@ function PieChart({ current, click, month }) {
       const response = await axios.get(`http://localhost:5000/api/home/piechart/${current}`);
       const { series, labels } = response.data;
       if (labels && series){
-        setChartData({
+        setChartDataPie({
           series: series,
           options: {
-            ...chartData.options,
+            ...chartDataPie.options,
             labels: labels,
           },
         });
       } else {
         console.error('Categories or Series are undefined');
       }
-      
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
   useEffect(() => {
-    pieData()
-    // Call the function if click is false show current date
     if (!click) {
       pieDataCurrentDate()
       console.log('Fetching data for current date:', current);
     }
-    // Call the function if click is true show when date change
     else if (click) {
       pieData()
       console.log('Fetching data for month:', month);
     }
-  }, [month, click]); // Now effect depends on date and click, it runs when either changes
+  }, [month, click]);
 
   return (
     <div className="Pie">
       <ApexCharts
-        options={chartData.options}
-        series={chartData.series}
+        options={chartDataPie.options}
+        series={chartDataPie.series}
         type="pie"
         width="380px"
       />

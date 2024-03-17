@@ -253,7 +253,7 @@ def get_data_barchart(filter):
     try:
         sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE(detection.DateTime) = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
         val = (filter,)
-        print(val)
+        # print(val)
         # print("sql ;",sql)
         mydb.execute(sql,val)
         records = mydb.fetchall()
@@ -263,7 +263,6 @@ def get_data_barchart(filter):
         "categories": categories,
         "series": series_data
     }
-
         return jsonify(data)
     except mysql.connector.Error as err:
         print(f"Error: {err}")

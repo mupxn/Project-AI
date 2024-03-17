@@ -3,7 +3,7 @@ import ApexCharts from 'react-apexcharts';
 import axios from "axios";
 import ChartComponent from "./ChartComponent.css"
 function BarChart({current, click, date}) {
-  const [chartData, setChartData] = useState({
+  const [chartDataBar, setChartDataBar] = useState({
     options: {
       chart: {
         id: 'basic-bar'
@@ -19,11 +19,11 @@ function BarChart({current, click, date}) {
       const response = await axios.get(`http://localhost:5000/api/home/barchart/${current}`);
       const { categories, series } = response.data;
       if (categories && series) {
-        setChartData({
+        setChartDataBar({
           options: {
-            ...chartData.options,
+            ...chartDataBar.options,
             xaxis: {
-              ...chartData.options.xaxis,
+              ...chartDataBar.options.xaxis,
               categories: categories,
             },
           },
@@ -47,11 +47,11 @@ function BarChart({current, click, date}) {
       const { categories, series } = response.data;
       console.log(response.data);
       if (categories && series) {
-        setChartData({
+        setChartDataBar({
           options: {
-            ...chartData.options,
+            ...chartDataBar.options,
             xaxis: {
-              ...chartData.options.xaxis,
+              ...chartDataBar.options.xaxis,
               categories: categories,
             },
           },
@@ -76,26 +76,21 @@ function BarChart({current, click, date}) {
 
 
   useEffect(() => {
-    // Call the function if click is false show current date
     if (click==false) {
       barDataCurrentDate()
-      // console.log('Fetching data for current date:', current);
     }
-    // Call the function if click is true show when date change
     else if (click==true) {
       barData()
-      // console.log('Fetching data for date:', date);
     }
-  // console.log(click);
-  }, [date]); // Now effect depends on date and click, it runs when either changes
+  }, [date,click]);
   
 
   return (
     <div className="Bar">
       {/* <button onClick={showclick}></button> */}
       <ApexCharts
-        options={chartData.options}
-        series={chartData.series}
+        options={chartDataBar.options}
+        series={chartDataBar.series}
         type="bar"
         width="500"
       />
