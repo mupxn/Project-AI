@@ -330,7 +330,8 @@ def process_image():
         if uploaded_image is None:
             return jsonify({'error': 'Uploaded image is corrupt or in an unsupported format'}), 400
 
-        db_path = f"backend/data_set/user"
+        db_path = os.path.join(os.path.dirname(__file__), "data_set", "user")
+        print(db_path)
         results = DeepFace.find(uploaded_image, db_path=db_path, enforce_detection=False)
         if results and not results[0].empty:
             first_result_df = results[0]
