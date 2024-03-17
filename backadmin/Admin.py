@@ -1,4 +1,5 @@
 import base64
+import os
 import cv2
 from flask import Flask, jsonify, Response,request
 from flask_cors import CORS
@@ -30,6 +31,7 @@ connection = mysql.connector.connect(
 )
 
 mydb = connection.cursor()
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
 
 @app.route('/api/user')
 def get_user():
@@ -315,6 +317,7 @@ def emotion_data():
         return jsonify({"message": "error"})
     
 
+
 @app.route('/api/admin/search', methods=['POST'])
 def process_image():
     try:
@@ -327,56 +330,70 @@ def process_image():
         if uploaded_image is None:
             return jsonify({'error': 'Uploaded image is corrupt or in an unsupported format'}), 400
 
+        db_path = f"backend/data_set/user"
+        results = DeepFace.find(uploaded_image, db_path=db_path, enforce_detection=False)
+        if results and not results[0].empty:
+            first_result_df = results[0]
+            most_similar_face_path = first_result_df.iloc[0]['identity']
+            most_similar_face_path = os.path.normpath(most_similar_face_path)
+            name = os.path.basename(os.path.dirname(most_similar_face_path))
+        else:
+            name = 0
+
+        query_results = []  # Initialize query_results list here
+
         query = """
         SELECT detection.DetectID,
-               user.Name,
-               detection.Gender,
-               detection.Age,
-               emotional.EmoName,
-               DATE(detection.DateTime) AS Date,
-               TIME(detection.DateTime) AS Time,
-               detection.FaceDetect,
-               detection.BgDetect
+            user.Name,
+            detection.Gender,
+            detection.Age,
+            emotional.EmoName,
+            DATE(detection.DateTime) AS Date,
+            TIME(detection.DateTime) AS Time,
+            detection.FaceDetect,
+            detection.BgDetect
         FROM detection
         JOIN user ON detection.UserID = user.UserID
         JOIN emotionaltext ON detection.TextID = emotionaltext.TextID
-        JOIN emotional ON emotionaltext.EmoID = emotional.EmoID;
+        JOIN emotional ON emotionaltext.EmoID = emotional.EmoID
+        WHERE detection.UserID = %s;
         """
-        mydb.execute(query)
+        val = (name,)
+        mydb.execute(query, val)
         records = mydb.fetchall()
 
-        results = []
+        if name != 0 :
+            query_results = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
 
-        for record in records:
-            try:
-                bg_image_data = base64.b64decode(record[8])
-                bg_image = Image.open(BytesIO(bg_image_data))
-                bg_image_cv = cv2.cvtColor(np.array(bg_image), cv2.COLOR_RGB2BGR)
-            except Exception as e:
-                print(f"Error processing record: {e}")
-                continue  # Skip this record
+        else:
+            for record in records:
+                try:
+                    bg_image_data = base64.b64decode(record[7])
+                    bg_image = Image.open(BytesIO(bg_image_data))
+                    bg_image_cv = cv2.cvtColor(np.array(bg_image), cv2.COLOR_RGB2BGR)
 
-        
-            verification_result = DeepFace.verify(uploaded_image, bg_image_cv, enforce_detection=False) 
+                    verification_result = DeepFace.verify(uploaded_image, bg_image_cv, enforce_detection=False,model_name = "Facenet512")
+                    if verification_result["verified"]:
+                        query_results.append({
+                                "ID": record[0],
+                                "Name": record[1],
+                                "Gender": record[2],
+                                "Age": record[3],
+                                "EmoName": record[4],
+                                "Date": str(record[5]),
+                                "Time": str(record[6]),
+                                "FaceDetect": record[7],
+                                "BGDetect": record[8]
+                        })
+                except Exception as e:
+                    print(f"Error processing record: {e}")
+                    continue
 
-            if verification_result:
-                results.append({
-                    'record': {
-                        "ID": record[0],
-                        "Name": record[1],
-                        "Gender": record[2],
-                        "Age": record[3],
-                        "EmoName": record[4],
-                        "Date": str(record[5]),
-                        "Time": str(record[6]),
-                        "FaceDetect": record[7],
-                        "BGDetect": record[8]
-                    }
-                })
-
-        return jsonify(results), 200
+        return jsonify(query_results), 200
     except Exception as e:
         return jsonify({'error': str(e)})
+
+
 
 
 if __name__ == '__main__':

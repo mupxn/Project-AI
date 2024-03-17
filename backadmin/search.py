@@ -66,7 +66,7 @@ def process_image():
                 continue  # Skip this record
 
         
-            verification_result = DeepFace.verify(uploaded_image, bg_image_cv, enforce_detection=False) 
+            verification_result = DeepFace.verify(uploaded_image, bg_image_cv, model_name='Facenet' ,enforce_detection=False) 
 
             if verification_result:
                 results.append({
@@ -80,7 +80,8 @@ def process_image():
                         "Time": str(record[6]),
                         "FaceDetect": record[7],
                         "BGDetect": record[8]
-                    }
+                    },
+                    'veification' : verification_result
                 })
 
         return jsonify(results), 200

@@ -12,6 +12,7 @@ function ModalChooseImg({ onclose, onsearch, onImageData }) {
     const [imgSrc, setImgSrc] = useState("")
     const [crop, setCrop] = useState()
     const [error, setError] = useState('')
+    const [isLoading, setIsLoading] = useState(false);
 
     const onSelectFile = (e) => {
         const file = e.target.files?.[0]
@@ -50,33 +51,44 @@ function ModalChooseImg({ onclose, onsearch, onImageData }) {
 
     const sendPictureToBackend = async () => {
         if (!imgSrc) return;
+        
+        setIsLoading(true); // Indicate the start of an operation that will take time
     
-        let imageData = {};
-        if (crop) {
-            // Assuming convertToPixelCrop and other variables are properly defined elsewhere
-            const croppedImage = previewCanvasRef.current.toDataURL('image/jpeg');
-            imageData = { image: croppedImage };
+        const formData = new FormData();
+        if (crop && previewCanvasRef && previewCanvasRef.current) {
+            // Convert the canvas to a blob and append it to formData
+            const blob = await new Promise(resolve => previewCanvasRef.current.toBlob(resolve, 'image/jpeg'));
+            formData.append('image', blob, 'cropped-image.jpg');
         } else {
-            const originalImage = imgSrc;
-            imageData = { image: originalImage };
+            // For the original image, assuming imgSrc is a base64 or URL, you need to convert it to a Blob
+            const response = await fetch(imgSrc);
+            const blob = await response.blob();
+            formData.append('image', blob, 'original-image.jpg');
         }
     
         try {
-            const response = await axios.post('http://localhost:5000/api/admin/search', imageData, {
+            const response = await axios.post('http://localhost:5000/api/admin/search', formData, {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
+                    // When sending FormData, axios and the browser will automatically set the Content-Type to 'multipart/form-data'
+                    // and include the proper boundary, so you don't manually set the Content-Type header when using FormData
+                }
             });
             console.log('Image uploaded successfully', response.data);
-            onImageData(response.data);
-            onsearch();
+            onImageData(response.data); 
+            onsearch()
         } catch (error) {
-            console.error('Error uploading image:', error);
+            console.error('Error uploading image:', error.response ? error.response.data : error.message);
+        } finally {
+            setIsLoading(false); // Operation is complete, reset loading state
+            onclose();
         }
     };
+    
 
     return (
         <div className='modal-container-search'>
+            {isLoading && <div className="loader"></div>}
+            {!isLoading &&
             <div className="modal-search">
                 <div className="modal-header-search">
                     <h1>Choose Img</h1>
@@ -141,17 +153,18 @@ function ModalChooseImg({ onclose, onsearch, onImageData }) {
 
                 <div className="modal-footer-search">
                     <div className="">
-                        <form onSubmit={sendPictureToBackend}>
-                            <input type="submit" className='btn btn-submit' value="Search" />
-                        </form>
+                    <div className="">
+                            <button className='btn btn-submit' onClick={sendPictureToBackend}>Search</button>
+                    </div>
                     </div>
                     <div className="">
-                        <button className='btn btn-cancel' onClick={onclose}>Cancel</button>
+                        <button className='btn btn-cancel' onClick={onclose} >Cancel</button>
                     </div>
 
                 </div>
 
             </div>
+}
         </div>
     )
 }
