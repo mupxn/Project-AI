@@ -76,7 +76,7 @@ function HomePage() {
       <div className="chart">
         <div className="s-chart">
           <div className="bar-chart">
-            <BarChart current={currentDate} click={clickDate} date={filterDate}/>
+            <BarChart current={currentDate} click={clickDate}date={filterDate} />
           </div>
           <div className="pie-chart">
             <PieChart current={currentMonth} click={clickMonth} month={filterMonth}/>

@@ -247,6 +247,7 @@ def get_data_barchart(filter):
     try:
         sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE(detection.DateTime) = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
         val = (filter,)
+        print(val)
         # print("sql ;",sql)
         mydb.execute(sql,val)
         records = mydb.fetchall()
@@ -256,6 +257,7 @@ def get_data_barchart(filter):
         "categories": categories,
         "series": series_data
     }
+
         return jsonify(data)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -278,7 +280,35 @@ def get_data_piechart(filter):
         return jsonify(data)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
-        return jsonify({"message": "error"})   
+        return jsonify({"message": "error"})
+    
+@app.route('/emotion_data', methods=['GET'])
+def emotion_data():
+    try:
+        query = """
+        SELECT 
+        emotional.EmoName, 
+        MONTH(detection.DateTime) AS Month, 
+        COUNT(*) AS EmotionCount
+        FROM 
+        emotional 
+        JOIN 
+        emotionaltext ON emotional.EmoID = emotionaltext.EmoID 
+        JOIN 
+        detection ON emotionaltext.TextID = detection.TextID 
+        GROUP BY 
+        emotional.EmoName, MONTH(detection.DateTime)
+        ORDER BY 
+        MONTH(detection.DateTime);
+        """
+        mydb.execute(query)
+        records = mydb.fetchall()
+        print(records)
+        return jsonify(records)
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({"message": "error"})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

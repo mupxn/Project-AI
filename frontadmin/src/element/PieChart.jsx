@@ -30,47 +30,55 @@ function PieChart({ current, click, month }) {
     try {
       const response = await axios.get(`http://localhost:5000/api/home/piechart/${month}`);
       const { series, labels } = response.data;
-      setChartData({
-        series: series,
-        options: {
-          ...chartData.options,
-          labels: labels,
-        },
-      });
+      if (labels && series){
+        setChartData({
+          series: series,
+          options: {
+            ...chartData.options,
+            labels: labels,
+          },
+        });
+      } else {
+        console.error('Categories or Series are undefined');
+      }
       console.log(labels)
       console.log(series)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
-  // const pieDataCurrentDate = async () => {
-  //   try {
-  //     const response = await axios.get(`http://localhost:5000/api/home/piechart/${current}`);
-  //     const { data } = response;
-  //     setChartData({
-  //       ...chartData,
-  //       series: data.series,
-  //       options: {
-  //         ...chartData.options,
-  //         labels: data.labels,
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // };
+  const pieDataCurrentDate = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/home/piechart/${current}`);
+      const { series, labels } = response.data;
+      if (labels && series){
+        setChartData({
+          series: series,
+          options: {
+            ...chartData.options,
+            labels: labels,
+          },
+        });
+      } else {
+        console.error('Categories or Series are undefined');
+      }
+      
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
   useEffect(() => {
     pieData()
     // Call the function if click is false show current date
-    // if (!click) {
-    //   pieDataCurrentDate()
-    //   console.log('Fetching data for current date:', current);
-    // }
-    // // Call the function if click is true show when date change
-    // else if (click) {
-    //   pieData()
-    //   console.log('Fetching data for month:', month);
-    // }
+    if (!click) {
+      pieDataCurrentDate()
+      console.log('Fetching data for current date:', current);
+    }
+    // Call the function if click is true show when date change
+    else if (click) {
+      pieData()
+      console.log('Fetching data for month:', month);
+    }
   }, [month, click]); // Now effect depends on date and click, it runs when either changes
 
   return (

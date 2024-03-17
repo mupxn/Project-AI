@@ -18,20 +18,23 @@ function BarChart({current, click, date}) {
     try {
       const response = await axios.get(`http://localhost:5000/api/home/barchart/${current}`);
       const { categories, series } = response.data;
-      
-      setChartData({
-        options: {
-          ...chartData.options,
-          xaxis: {
-            ...chartData.options.xaxis,
-            categories: categories,
+      if (categories && series) {
+        setChartData({
+          options: {
+            ...chartData.options,
+            xaxis: {
+              ...chartData.options.xaxis,
+              categories: categories,
+            },
           },
-        },
-        series: [{
-          name: "Series Name",
-          data: series
-        }]
-      });
+          series: [{
+            name: "Series Name",
+            data: series
+          }]
+        });
+      } else {
+        console.error('Categories or Series are undefined');
+      }
       console.log(categories);
       console.log(series);
     } catch (error) {
@@ -42,42 +45,54 @@ function BarChart({current, click, date}) {
     try {
       const response = await axios.get(`http://localhost:5000/api/home/barchart/${date}`);
       const { categories, series } = response.data;
-      console.log(date);
-      setChartData({
-        options: {
-          ...chartData.options,
-          xaxis: {
-            ...chartData.options.xaxis,
-            categories: categories,
+      console.log(response.data);
+      if (categories && series) {
+        setChartData({
+          options: {
+            ...chartData.options,
+            xaxis: {
+              ...chartData.options.xaxis,
+              categories: categories,
+            },
           },
-        },
-        series: [{
-          name: "Series Name",
-          data: series
-        }]
-      });
+          series: [{
+            name: "Series Name",
+            data: series
+          }]
+        });
+      } else {
+        console.error('Categories or Series are undefined');
+      }
       console.log(categories);
       console.log(series);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+  const showclick =()=>{
+    console.log(date);
+    console.log(current);
+  }
+
 
   useEffect(() => {
     // Call the function if click is false show current date
-    if (!click) {
+    if (click==false) {
       barDataCurrentDate()
       // console.log('Fetching data for current date:', current);
     }
     // Call the function if click is true show when date change
-    else if (click) {
+    else if (click==true) {
       barData()
       // console.log('Fetching data for date:', date);
     }
-  }, [date, click]); // Now effect depends on date and click, it runs when either changes
+  // console.log(click);
+  }, [date]); // Now effect depends on date and click, it runs when either changes
+  
 
   return (
     <div className="Bar">
+      <button onClick={showclick}></button>
       <ApexCharts
         options={chartData.options}
         series={chartData.series}
