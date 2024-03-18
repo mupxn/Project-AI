@@ -16,6 +16,7 @@
     padding: 2rem;
     width: 500px;
 }
+
 .btn{
     border: none;
     color: #fff;
@@ -32,8 +33,7 @@
     background-color: #d9534f;
 }
 .modal-content-adduser{
-    
-    margin-bottom: 2rem;
+    margin-bottom: 3px;
 }
 .modal-footer-adduser{
     display: flex;

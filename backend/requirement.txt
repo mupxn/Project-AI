@@ -1,0 +1,10 @@
+Flask==2.0.1
+Flask-CORS==3.0.10
+opencv-python==4.5.3.56
+Pillow==9.0.0
+deepface==0.0.68
+pip install Pillow
+numpy==1.21.2
+mysql-connector-python==8.0.26
+pyttsx3==2.90
+Werkzeug==3.0.1

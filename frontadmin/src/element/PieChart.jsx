@@ -26,10 +26,11 @@ function PieChart({ current, click, month }) {
     },
   });
   const pieData = async () => {
-    // console.log(month);
     try {
       const response = await axios.get(`http://localhost:5000/api/home/piechart/${month}`);
       const { series, labels } = response.data;
+      console.log(labels)
+      console.log(series)
       if (labels && series){
         setChartDataPie({
           series: series,
@@ -41,8 +42,6 @@ function PieChart({ current, click, month }) {
       } else {
         console.error('Categories or Series are undefined');
       }
-      console.log(labels)
-      console.log(series)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -60,7 +59,7 @@ function PieChart({ current, click, month }) {
           },
         });
       } else {
-        console.error('Categories or Series are undefined');
+        console.error('series or labels are undefined');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -69,11 +68,9 @@ function PieChart({ current, click, month }) {
   useEffect(() => {
     if (!click) {
       pieDataCurrentDate()
-      console.log('Fetching data for current date:', current);
     }
     else if (click) {
       pieData()
-      console.log('Fetching data for month:', month);
     }
   }, [month, click]);
 

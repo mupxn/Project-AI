@@ -1,7 +1,7 @@
 import base64
 import os
 import cv2
-from flask import Flask, jsonify, Response,request
+from flask import Flask, jsonify, Response,request,send_from_directory
 from flask_cors import CORS
 import json
 import mysql.connector
@@ -23,6 +23,11 @@ class CustomJSONEncoder(json.JSONEncoder):
       
         return super().default(obj)
 app.json_encoder = CustomJSONEncoder()
+
+UPLOAD_FOLDER = 'data_set/user'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 connection = mysql.connector.connect(
   host="localhost",
@@ -50,7 +55,13 @@ def get_user():
         return jsonify(formatted_records)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
-        
+
+@app.route('/user_images/<userid>/<filename>')
+def user_images(userid,filename):
+    imagepath = os.path.join(os.getcwd(),"data_set/user",str(userid))
+    print(imagepath)
+    return send_from_directory(imagepath ,filename)
+
 @app.route('/api/user/<string:search>')
 def get_user_search(search):
     # Corrected SQL query with a single WHERE clause and an AND condition
@@ -235,16 +246,32 @@ def delete_user(userID):
         print(f"Error: {err}")
         return jsonify({"message": "error"})
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/api/user/adduser', methods=['POST'])
 def add_user():
     try:
-        new_id = request.json.get('newId')
-        new_user = request.json.get('newUser')
-        image_file = request.files['image']
+        if 'image' not in request.files:
+            return 'No file part'
+        file = request.files['image']
+        userId = request.form['userId']
+        userName = request.form['userName']
+        if file.filename == '':
+            return 'No selected file'
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            user_folder = os.path.join(app.config['UPLOAD_FOLDER'], userId)
+            if not os.path.exists(user_folder):
+                os.makedirs(user_folder)
+            file_path = os.path.join(user_folder, filename)
+            file.save(file_path)
+            # return 'File successfully saved'
+
         sql = ("INSERT INTO user(user.UserID,user.Name) VALUES (%s,%s);")
-        val = (new_id,new_user)
-        print("sql ;",image_file)
-        # print("val ;",val)
+        val = (userId,userName)
+        # print("sql ;",image_file)
+        # # print("val ;",val)
         mydb.execute(sql,val)
         connection.commit()
         return jsonify({"message": "User deleted successfully"})
@@ -312,7 +339,7 @@ def emotion_data():
         """
         mydb.execute(query)
         records = mydb.fetchall()
-        print(records)
+        # print(records)
         return jsonify(records)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -399,4 +426,4 @@ def process_image():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0',port=5000, debug=True)

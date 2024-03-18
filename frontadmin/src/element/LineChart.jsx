@@ -30,7 +30,7 @@ function LineChart() {
         ...prevState,
         series: transformData
       }));
-      console.log(transformData)
+      // console.log(transformData)
       // console.log(organizedData);
     } catch (error) {
       console.error('Error fetching data:', error);

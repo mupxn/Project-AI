@@ -18,6 +18,8 @@ function BarChart({current, click, date}) {
     try {
       const response = await axios.get(`http://localhost:5000/api/home/barchart/${current}`);
       const { categories, series } = response.data;
+      // console.log(categories);
+      // console.log(series);
       if (categories && series) {
         setChartDataBar({
           options: {
@@ -28,15 +30,13 @@ function BarChart({current, click, date}) {
             },
           },
           series: [{
-            name: "Series Name",
+            name: "Name",
             data: series
           }]
         });
       } else {
         console.error('Categories or Series are undefined');
       }
-      console.log(categories);
-      console.log(series);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -45,7 +45,8 @@ function BarChart({current, click, date}) {
     try {
       const response = await axios.get(`http://localhost:5000/api/home/barchart/${date}`);
       const { categories, series } = response.data;
-      console.log(response.data);
+      // console.log(categories);
+      // console.log(series);
       if (categories && series) {
         setChartDataBar({
           options: {
@@ -56,15 +57,13 @@ function BarChart({current, click, date}) {
             },
           },
           series: [{
-            name: "Series Name",
+            name: "Name",
             data: series
           }]
         });
       } else {
         console.error('Categories or Series are undefined');
       }
-      console.log(categories);
-      console.log(series);
     } catch (error) {
       console.error('Error fetching data:', error);
     }

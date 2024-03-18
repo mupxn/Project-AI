@@ -12,7 +12,7 @@ function ModalDeleteUser({ onClose, userId, userName, action }) {
     }
     const handleSubmit = async () => {
         try {
-            await axios.get(`http://localhost:5000/api/user/${userId}/delete`);
+            await axios.post(`http://localhost:5000/api/user/${userId}/delete`);
             action()
             onClose()
         } catch (error) {
