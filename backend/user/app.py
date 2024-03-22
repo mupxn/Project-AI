@@ -46,7 +46,7 @@ if not camera.isOpened():
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data_set/user")
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
 
 def sound(name, emotion):

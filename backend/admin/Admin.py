@@ -24,7 +24,7 @@ class CustomJSONEncoder(json.JSONEncoder):
         return super().default(obj)
 app.json_encoder = CustomJSONEncoder()
 
-UPLOAD_FOLDER = 'data_set/user'
+UPLOAD_FOLDER = '../data_set/user'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -37,7 +37,7 @@ connection = mysql.connector.connect(
 )
 
 mydb = connection.cursor()
-db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data_set/user")
 
 @app.route('/api/user')
 def get_user():
@@ -58,7 +58,7 @@ def get_user():
 
 @app.route('/user_images/<userid>/<filename>')
 def user_images(userid,filename):
-    imagepath = os.path.join(os.getcwd(),"data_set/user",str(userid))
+    imagepath = os.path.join(os.getcwd(),"../data_set/user",str(userid))
     print(imagepath)
     return send_from_directory(imagepath ,filename)
 
@@ -358,7 +358,6 @@ def process_image():
         if uploaded_image is None:
             return jsonify({'error': 'Uploaded image is corrupt or in an unsupported format'}), 400
 
-        db_path = r"data_set/user"
         print(db_path)
         results = DeepFace.find(uploaded_image, db_path=db_path, enforce_detection=False)
         if results and not results[0].empty:
