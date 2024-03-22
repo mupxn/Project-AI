@@ -286,7 +286,7 @@ function SearchPage() {
                   <div className="td name">{item.Name}</div>
                   <div className="td gender">{item.Gender}</div>
                   <div className="td age">{item.Age}</div>
-                  <div className="th feel">{item.EmoName}</div>
+                  <div className="th feel"><img src={`/emotion_image/${item.EmoName}.png`} className="emo" /></div>
                   <div className="th date">{item.Date}</div>
                   <div className="th time">{item.Time}</div>
                   <div className="td faceimg"><img src={`data:image/jpeg;base64,${item.FaceDetect}`} style={{ width: "60px", height: "60px", objectFit: "cover" }} /></div>

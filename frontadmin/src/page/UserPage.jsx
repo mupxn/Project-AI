@@ -4,7 +4,10 @@ import './UserPage.css'
 import ModalDeleteUser from '../element/ModalDeleteUser';
 import ModalAddUser from '../element/ModalAddUser';
 import ModalEditUser from '../element/ModalEditUser';
+import EditIcon from '../icon/EditIcon'
+import DeleteIcon from '../icon/DeleteIcon';
 import axios from 'axios';
+import AdduserIcon from '../icon/AdduserIcon';
 
 
 function UserPage() {
@@ -15,24 +18,24 @@ function UserPage() {
   const [isModalDeleteUser, setIsModalDeleteUser] = useState(false) //modal delete
   const [isModalEditUser, setIsModalEditUser] = useState(false) //modal edit
   const [searchQuery, setSearchQuery] = useState('');
-//edit
-  const openModalEditUser = (userID,userName) => {
+  //edit
+  const openModalEditUser = (userID, userName) => {
     setIsModalEditUser(true)
     setSelected(userID)
     setSelectedName(userName)
   }
   const closeModalEditUser = () => setIsModalEditUser(false)
-//delete
-  const openModalDelelteUser = (userID,userName) => {
+  //delete
+  const openModalDelelteUser = (userID, userName) => {
     setIsModalDeleteUser(true);
     setSelected(userID)
     setSelectedName(userName)
   }
   const closeModalDelelteUser = () => setIsModalDeleteUser(false);
-//add
+  //add
   const openModalAddUser = () => setIsModalAddUser(true);
   const closeModalAddUser = () => setIsModalAddUser(false);
-//search
+  //search
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
 
@@ -83,7 +86,12 @@ function UserPage() {
             </form>
           </div>
           <div className="head-adduser">
-            <button type="button" className="btn-add-user" onClick={openModalAddUser}>Add User</button>
+            <button type="button" className="btn-add-user" onClick={openModalAddUser}>
+              <div className="wrap">
+                <div className="icon-wrap"><AdduserIcon /></div>
+                <div className="text-add">Add User</div>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -103,13 +111,13 @@ function UserPage() {
           {users.map(user => (
             <div className='tr' key={user.UserID}>
               <div className="td id">{user.ID}</div>
-              <div className="td profile" ><img src={`http://localhost:5000/user_images/${user.ID}/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
+              <div className="td profile dropdown"><img src={`http://localhost:5000/user_images/${user.ID}/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
               <div className="td name">{user.Name}</div>
               <div className="td edit">
-                <button className="edit-user" onClick={() => openModalEditUser(user.ID,user.Name)}>แก้ไข</button>
+                <button className="edit-user" onClick={() => openModalEditUser(user.ID, user.Name)}><EditIcon /></button>
               </div>
               <div className="td delete">
-                <button className="delete-user" onClick={() => openModalDelelteUser(user.ID,user.Name)}>ลบ</button>
+                <button className="delete-user" onClick={() => openModalDelelteUser(user.ID, user.Name)}><DeleteIcon /></button>
               </div>
             </div>
           ))}

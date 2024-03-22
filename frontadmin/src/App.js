@@ -8,16 +8,12 @@ import Sidebar from './element/Sidebar';
 import LogInPage from './page/LogInPage';
 
 function App() {
-  // Using the useLocation hook to get the current location
   const location = useLocation();
-
-  // Checking if the current path is NOT the login page to decide whether to show the sidebar
   const showSidebar = location.pathname !== '/login';
 
   return (
     <div className="App">
       <div className='container'>
-        {/* Conditionally rendering the sidebar based on the path */}
         {showSidebar && (
           <div className='sidebarContainer'><Sidebar /></div>
         )}

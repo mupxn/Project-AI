@@ -52,6 +52,7 @@ def get_user():
             return jsonify({"message": "No records found for today."}), 404
         
         formatted_records = [{"ID": record[0], "Name": record[1]} for record in records]
+        print("success")
         return jsonify(formatted_records)
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -100,7 +101,7 @@ def get_detection():
     FROM detection
     JOIN user ON detection.UserID = user.UserID
     JOIN emotionaltext ON detection.TextID = emotionaltext.TextID
-    JOIN emotional ON emotionaltext.EmoID = emotional.EmoID;
+    JOIN emotional ON emotionaltext.EmoID = emotional.EmoID ORDER BY detection.DetectID ASC;
     """
     try:
         

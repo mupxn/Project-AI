@@ -28,8 +28,32 @@
     display: flex;
     justify-content: space-around;
 }
+.edit-user,.delete-user{
+    border: none;
+    background-color: Transparent;
+    width: 40px;
+}
 .table-body{
     background-color: rgb(255, 255, 255);
+}
+.wrap{
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    width: 100px;
+    align-items: center;
+}
+.btn-add-user{
+    border-radius: 3px;
+    background: #2b80ff;
+    border: transparent;
+    color: white;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.wrap .icon-wrap{
+    width: 18%;
+    margin: 0;
 }
 .td{
     width: 10%;
