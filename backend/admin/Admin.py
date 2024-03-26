@@ -12,6 +12,7 @@ from deepface import DeepFace
 import numpy as np
 from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
+from MySQLdb import MySQLError
 
 app = Flask(__name__)
 CORS(app)
@@ -63,7 +64,7 @@ def get_user():
         formatted_records = [{"ID": record[0], "Name": record[1]} for record in records]
         print("success")
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/user_images/<userid>/<filename>')
@@ -92,7 +93,7 @@ def get_user_search(search):
         # Create a list of dictionaries for the found records to return as JSON
         formatted_records = [{"ID": record[0], "Name": record[1]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
         return jsonify({"error": str(err)})
     
@@ -120,7 +121,7 @@ def get_detection():
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/api/detect/<string:search>')
@@ -148,7 +149,7 @@ def get_detection_search(search):
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/api/detect/filter/date/<string:filter>')
@@ -161,7 +162,7 @@ def get_filterdate(filter):
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/api/detect/filter/date/<string:filter>/<string:search>')
@@ -182,7 +183,7 @@ def get_filterdate_search(filter, search):
         records = mydb.fetchall()
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
         return jsonify({"error": str(err)})
 
@@ -198,7 +199,7 @@ def get_filtermonth_search(filter,search):
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/api/detect/filter/month/<string:filter>')
@@ -211,7 +212,7 @@ def get_filtermonth(filter):
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/api/detect/filter/year/<string:filter>/<string:search>')
@@ -225,7 +226,7 @@ def get_filteryear(filter,search):
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/api/detect/filter/year/<string:filter>')
@@ -238,7 +239,7 @@ def get_filteryear_search(filter):
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
         return jsonify(formatted_records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/api/user/<int:userID>/update', methods=['PUT'])
@@ -251,7 +252,7 @@ def update_name(userID):
         mydb.execute(sql, val)
         mydb.commit()
         return jsonify({"message":"success"})
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
 
 @app.route('/api/user/<int:userID>/delete', methods=['POST'])
@@ -263,7 +264,7 @@ def delete_user(userID):
         mydb.execute(sql,val)
         mydb.commit()
         return jsonify({"message": "User deleted successfully"})
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
         return jsonify({"message": "error"})
 
@@ -297,7 +298,7 @@ def add_user():
         mydb.execute(sql,val)
         mydb.commit()
         return jsonify({"message": "User deleted successfully"})
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
         return jsonify({"message": "error"})    
 
@@ -318,7 +319,7 @@ def get_data_barchart(filter):
         "series": series_data
     }
         return jsonify(data)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
         return jsonify({"message": "error"})   
 
@@ -338,7 +339,7 @@ def get_data_piechart(filter):
         "labels": labels_data
         }
         return jsonify(data)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
         return jsonify({"message": "error"})
     
@@ -366,7 +367,7 @@ def emotion_data():
         records = mydb.fetchall()
         # print(records)
         return jsonify(records)
-    except mysql.connector.Error as err:
+    except MySQLError as err:
         print(f"Error: {err}")
         return jsonify({"message": "error"})
 
