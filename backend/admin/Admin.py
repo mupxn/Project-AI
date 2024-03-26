@@ -11,9 +11,11 @@ from io import BytesIO
 from deepface import DeepFace
 import numpy as np
 from werkzeug.utils import secure_filename
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 CORS(app)
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -29,18 +31,25 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-connection = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  password="",
-  database="project"
-)
 
-mydb = connection.cursor()
+# connection = mysql.connector.connect(
+#   host="localhost",
+#   user="root",
+#   password="",
+#   database="project"
+# )
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'project'
+
+mysql = MySQL(app)
+
 db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data_set/user")
 
 @app.route('/api/user')
 def get_user():
+    mydb = mysql.connection.cursor()
     query = """
     SELECT user.UserID,user.Name FROM user WHERE user.UserID != 0;
     """
@@ -48,8 +57,8 @@ def get_user():
         mydb.execute(query)
         records = mydb.fetchall()
         
-        if not records:
-            return jsonify({"message": "No records found for today."}), 404
+        # if not records:
+        #     return jsonify({"message": "No records found for today."})
         
         formatted_records = [{"ID": record[0], "Name": record[1]} for record in records]
         print("success")
@@ -65,6 +74,7 @@ def user_images(userid,filename):
 
 @app.route('/api/user/<string:search>')
 def get_user_search(search):
+    mydb = mysql.connection.cursor()
     # Corrected SQL query with a single WHERE clause and an AND condition
     query = """
     SELECT user.UserID, user.Name FROM user WHERE user.UserID != 0 AND user.Name LIKE %s;
@@ -88,6 +98,7 @@ def get_user_search(search):
     
 @app.route('/api/detect')
 def get_detection():
+    mydb = mysql.connection.cursor()
     query = """
     SELECT detection.DetectID,
     user.Name,
@@ -114,6 +125,7 @@ def get_detection():
 
 @app.route('/api/detect/<string:search>')
 def get_detection_search(search):
+    mydb = mysql.connection.cursor()
     query = """
     SELECT detection.DetectID,
     user.Name,
@@ -141,6 +153,7 @@ def get_detection_search(search):
 
 @app.route('/api/detect/filter/date/<string:filter>')
 def get_filterdate(filter):
+    mydb = mysql.connection.cursor()
     try:
         val = (filter,)
         sql = ("SELECT detection.DetectID, user.Name, detection.Gender, detection.Age, emotional.EmoName, DATE(detection.DateTime) AS Date, TIME(detection.DateTime) AS Time, detection.FaceDetect, detection.BgDetect FROM detection JOIN user ON detection.UserID = user.UserID JOIN emotionaltext ON detection.TextID = emotionaltext.TextID JOIN emotional ON emotionaltext.EmoID = emotional.EmoID WHERE DATE(detection.DateTime) = %s;")
@@ -153,6 +166,7 @@ def get_filterdate(filter):
 
 @app.route('/api/detect/filter/date/<string:filter>/<string:search>')
 def get_filterdate_search(filter, search):
+    mydb = mysql.connection.cursor()
     try:
         search_pattern = f"%{search}%"  # Prepare the LIKE pattern
         val = (filter, search_pattern)  # Correct tuple structure
@@ -175,6 +189,7 @@ def get_filterdate_search(filter, search):
 
 @app.route('/api/detect/filter/month/<string:filter>/<string:search>')
 def get_filtermonth_search(filter,search):
+    mydb = mysql.connection.cursor()
     try:
         search_pattern = f"%{search}%"
         val = (filter, search_pattern)
@@ -188,6 +203,7 @@ def get_filtermonth_search(filter,search):
 
 @app.route('/api/detect/filter/month/<string:filter>')
 def get_filtermonth(filter):
+    mydb = mysql.connection.cursor()
     try:
         val = (filter,)
         sql = ("SELECT detection.DetectID, user.Name, detection.Gender, detection.Age, emotional.EmoName, DATE(detection.DateTime) AS Date, TIME(detection.DateTime) AS Time, detection.FaceDetect, detection.BgDetect FROM detection JOIN user ON detection.UserID = user.UserID JOIN emotionaltext ON detection.TextID = emotionaltext.TextID JOIN emotional ON emotionaltext.EmoID = emotional.EmoID WHERE DATE_FORMAT(detection.DateTime, '%Y-%m') = %s;")
@@ -200,6 +216,7 @@ def get_filtermonth(filter):
 
 @app.route('/api/detect/filter/year/<string:filter>/<string:search>')
 def get_filteryear(filter,search):
+    mydb = mysql.connection.cursor()
     try:
         search_pattern = f"%{search}%"
         val = (filter, search_pattern)
@@ -213,6 +230,7 @@ def get_filteryear(filter,search):
 
 @app.route('/api/detect/filter/year/<string:filter>')
 def get_filteryear_search(filter):
+    mydb = mysql.connection.cursor()
     try:
         val = (filter,)
         sql = ("SELECT detection.DetectID, user.Name, detection.Gender, detection.Age, emotional.EmoName, DATE(detection.DateTime) AS Date, TIME(detection.DateTime) AS Time, detection.FaceDetect, detection.BgDetect FROM detection JOIN user ON detection.UserID = user.UserID JOIN emotionaltext ON detection.TextID = emotionaltext.TextID JOIN emotional ON emotionaltext.EmoID = emotional.EmoID WHERE DATE_FORMAT(detection.DateTime, '%Y') = %s;")
@@ -225,23 +243,25 @@ def get_filteryear_search(filter):
 
 @app.route('/api/user/<int:userID>/update', methods=['PUT'])
 def update_name(userID):
+    mydb = mysql.connection.cursor()
     try:
         new_name = request.json.get('name')
         sql = ("UPDATE user SET user.Name = %s WHERE user.UserID = %s;")
         val = (new_name,userID)
         mydb.execute(sql, val)
-        connection.commit()
+        mydb.commit()
         return jsonify({"message":"success"})
     except mysql.connector.Error as err:
         print(f"Error: {err}")
 
 @app.route('/api/user/<int:userID>/delete', methods=['POST'])
 def delete_user(userID):
+    mydb = mysql.connection.cursor()
     try:
         sql = ("DELETE FROM user WHERE user.UserID = %s;")
         val = (userID,)
         mydb.execute(sql,val)
-        connection.commit()
+        mydb.commit()
         return jsonify({"message": "User deleted successfully"})
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -252,6 +272,7 @@ def allowed_file(filename):
 
 @app.route('/api/user/adduser', methods=['POST'])
 def add_user():
+    mydb = mysql.connection.cursor()
     try:
         if 'image' not in request.files:
             return 'No file part'
@@ -274,7 +295,7 @@ def add_user():
         # print("sql ;",image_file)
         # # print("val ;",val)
         mydb.execute(sql,val)
-        connection.commit()
+        mydb.commit()
         return jsonify({"message": "User deleted successfully"})
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -282,6 +303,7 @@ def add_user():
 
 @app.route('/api/home/barchart/<string:filter>')
 def get_data_barchart(filter):
+    mydb = mysql.connection.cursor()
     try:
         sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE(detection.DateTime) = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
         val = (filter,)
@@ -302,8 +324,9 @@ def get_data_barchart(filter):
 
 @app.route('/api/home/piechart/<string:filter>')
 def get_data_piechart(filter):
+    mydb = mysql.connection.cursor()
     try:
-        sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE_FORMAT(detection.DateTime, '%Y-%m') = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
+        sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE_FORMAT(detection.DateTime, '%%Y-%%m') = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
         val = (filter,)
         # print("sql ;",sql)
         mydb.execute(sql,val)
@@ -321,6 +344,7 @@ def get_data_piechart(filter):
     
 @app.route('/emotion_data', methods=['GET'])
 def emotion_data():
+    mydb = mysql.connection.cursor()
     try:
         query = """
         SELECT 
@@ -349,6 +373,7 @@ def emotion_data():
 
 @app.route('/api/admin/search', methods=['POST'])
 def process_image():
+    mydb = mysql.connection.cursor()
     try:
         if 'image' not in request.files:
             return jsonify({'error': 'No image found in request'}), 400
