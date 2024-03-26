@@ -250,7 +250,7 @@ def update_name(userID):
         sql = ("UPDATE user SET user.Name = %s WHERE user.UserID = %s;")
         val = (new_name,userID)
         mydb.execute(sql, val)
-        mydb.commit()
+        mysql.connection.commit()
         return jsonify({"message":"success"})
     except MySQLError as err:
         print(f"Error: {err}")
@@ -262,7 +262,7 @@ def delete_user(userID):
         sql = ("DELETE FROM user WHERE user.UserID = %s;")
         val = (userID,)
         mydb.execute(sql,val)
-        mydb.commit()
+        mysql.connection.commit()
         return jsonify({"message": "User deleted successfully"})
     except MySQLError as err:
         print(f"Error: {err}")
@@ -296,7 +296,7 @@ def add_user():
         # print("sql ;",image_file)
         # # print("val ;",val)
         mydb.execute(sql,val)
-        mydb.commit()
+        mysql.connection.commit()
         return jsonify({"message": "User deleted successfully"})
     except MySQLError as err:
         print(f"Error: {err}")

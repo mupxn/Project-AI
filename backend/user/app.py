@@ -49,32 +49,33 @@ db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data_set/
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
 
 def sound(name, emotion):
-    mydb = mysql.connection.cursor()
-    query = """
-    SELECT emotionaltext.Text, user.Name 
-    FROM detection 
-    JOIN emotionaltext ON detection.TextID = emotionaltext.TextID 
-    JOIN emotional ON emotionaltext.EmoID = emotional.EmoID 
-    JOIN user ON detection.UserID = user.UserID
-    WHERE emotional.EmoName = %s AND detection.UserID = %s
-    ORDER BY detection.DetectID DESC 
-    LIMIT 1
-    """
-    val = (emotion, name)  
+    with app.app_context():
+        mydb = mysql.connection.cursor()
+        query = """
+        SELECT emotionaltext.Text, user.Name 
+        FROM detection 
+        JOIN emotionaltext ON detection.TextID = emotionaltext.TextID 
+        JOIN emotional ON emotionaltext.EmoID = emotional.EmoID 
+        JOIN user ON detection.UserID = user.UserID
+        WHERE emotional.EmoName = %s AND detection.UserID = %s
+        ORDER BY detection.DetectID DESC 
+        LIMIT 1
+        """
+        val = (emotion, name)  
 
-    mydb.execute(query, val)
-    result = mydb.fetchone()  
+        mydb.execute(query, val)
+        result = mydb.fetchone()  
 
-    if result:
-        text_to_speak, user_name = result
-        engine = pyttsx3.init()
-        engine.setProperty('volume', 1) 
-        engine.setProperty('rate', 120) 
-        engine.setProperty('voice', TH_voice_id)
-        engine.say('คุณ' + user_name + ' ' + text_to_speak)
-        engine.runAndWait()
-    else:
-        print("No records found.")
+        if result:
+            text_to_speak, user_name = result
+            engine = pyttsx3.init()
+            engine.setProperty('volume', 1) 
+            engine.setProperty('rate', 120) 
+            engine.setProperty('voice', TH_voice_id)
+            engine.say('คุณ' + user_name + ' ' + text_to_speak)
+            engine.runAndWait()
+        else:
+            print("No records found.")
 
     
 
@@ -82,21 +83,22 @@ def sound(name, emotion):
 
 
 def insert_face(name, emotion, age, gender, face_image, full_image):
-    mydb = mysql.connection.cursor()
-    face_image_base64 = base64.b64encode(cv2.imencode('.jpg', face_image)[1]).decode()
-    full_image_base64 = base64.b64encode(cv2.imencode('.jpg', full_image)[1]).decode()
+    with app.app_context():
+        mydb = mysql.connection.cursor()
+        face_image_base64 = base64.b64encode(cv2.imencode('.jpg', face_image)[1]).decode()
+        full_image_base64 = base64.b64encode(cv2.imencode('.jpg', full_image)[1]).decode()
 
-    sql = ("INSERT INTO detection (UserID, TextID, Age, Gender, FaceDetect, BgDetect) "
-           "VALUES (%s, (SELECT TextID FROM emotionaltext "
-           "JOIN emotional ON emotionaltext.EmoID = emotional.EmoID "
-           "WHERE emotional.EmoName = %s ORDER BY RAND() LIMIT 1), %s, %s, %s, %s)")
-    val = (name, emotion, age, gender, face_image_base64, full_image_base64)
+        sql = ("INSERT INTO detection (UserID, TextID, Age, Gender, FaceDetect, BgDetect) "
+            "VALUES (%s, (SELECT TextID FROM emotionaltext "
+            "JOIN emotional ON emotionaltext.EmoID = emotional.EmoID "
+            "WHERE emotional.EmoName = %s ORDER BY RAND() LIMIT 1), %s, %s, %s, %s)")
+        val = (name, emotion, age, gender, face_image_base64, full_image_base64)
 
-    try:
-        mydb.execute(sql, val)
-        mydb.commit()
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
+        try:
+            mydb.execute(sql, val)
+            mysql.connection.commit()
+        except Exception as err:
+            print(f"Error: {err}")
 
 
 def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
@@ -169,42 +171,43 @@ def video_feed():
 
 @app.route('/user/showresult')
 def get_records_from_today():
-    mydb = mysql.connection.cursor()
-    query = """
-     SELECT 
-        user.Name, 
-        detection.Gender, 
-        detection.Age, 
-        DATE(detection.DateTime) AS Date,
-        TIME(detection.DateTime) AS Time,
-        detection.FaceDetect,
-        emotional.EmoName
-    FROM 
-        detection 
-    JOIN 
-        user ON detection.UserID = user.UserID 
-    JOIN 
-        emotionaltext ON emotionaltext.TextID = detection.TextID 
-    JOIN 
-        emotional ON emotionaltext.EmoID = emotional.EmoID 
-    WHERE 
-        DATE(detection.DateTime) = CURDATE()
-    ORDER BY detection.DetectID DESC;
-    """
-    
-    try:
-        mydb.execute(query)
-        records = mydb.fetchall() 
+    with app.app_context():
+        mydb = mysql.connection.cursor()
+        query = """
+        SELECT 
+            user.Name, 
+            detection.Gender, 
+            detection.Age, 
+            DATE(detection.DateTime) AS Date,
+            TIME(detection.DateTime) AS Time,
+            detection.FaceDetect,
+            emotional.EmoName
+        FROM 
+            detection 
+        JOIN 
+            user ON detection.UserID = user.UserID 
+        JOIN 
+            emotionaltext ON emotionaltext.TextID = detection.TextID 
+        JOIN 
+            emotional ON emotionaltext.EmoID = emotional.EmoID 
+        WHERE 
+            DATE(detection.DateTime) = CURDATE()
+        ORDER BY detection.DetectID DESC;
+        """
         
-        if not records:
-            return jsonify({"message": "No records found for today."}), 404
-        
-        formatted_records = [{"Name": record[0], "Gender": record[1], "Age": record[2], "Date": str(record[3]), "Time": str(record[4]), "FaceDetect": record[5], "EmoName": record[6]} for record in records]
-        
-        return jsonify(formatted_records)
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        # return jsonify({"error": str(err)}), 500
+        try:
+            mydb.execute(query)
+            records = mydb.fetchall() 
+            
+            if not records:
+                return jsonify({"message": "No records found for today."}), 404
+            
+            formatted_records = [{"Name": record[0], "Gender": record[1], "Age": record[2], "Date": str(record[3]), "Time": str(record[4]), "FaceDetect": record[5], "EmoName": record[6]} for record in records]
+            
+            return jsonify(formatted_records)
+        except Exception as err:
+            print(f"Error: {err}")
+            # return jsonify({"error": str(err)}), 500
     
 
         
