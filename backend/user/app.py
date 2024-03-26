@@ -11,12 +11,11 @@ import base64
 import mysql.connector
 import pyttsx3
 import threading
-
+from flask_mysqldb import MySQL
 
 
 app = Flask(__name__)
 CORS(app)
-
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -30,14 +29,14 @@ app.json_encoder = CustomJSONEncoder()
 
 camera = cv2.VideoCapture(0)  
 
-connection = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  password="",
-  database="project"
-)
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'project'
 
-mydb = connection.cursor()
+mysql = MySQL(app)
+
+
 
 
 if not camera.isOpened():
@@ -50,6 +49,7 @@ db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data_set/
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
 
 def sound(name, emotion):
+    mydb = mysql.connection.cursor()
     query = """
     SELECT emotionaltext.Text, user.Name 
     FROM detection 
@@ -82,6 +82,7 @@ def sound(name, emotion):
 
 
 def insert_face(name, emotion, age, gender, face_image, full_image):
+    mydb = mysql.connection.cursor()
     face_image_base64 = base64.b64encode(cv2.imencode('.jpg', face_image)[1]).decode()
     full_image_base64 = base64.b64encode(cv2.imencode('.jpg', full_image)[1]).decode()
 
@@ -93,7 +94,7 @@ def insert_face(name, emotion, age, gender, face_image, full_image):
 
     try:
         mydb.execute(sql, val)
-        connection.commit()
+        mydb.commit()
     except mysql.connector.Error as err:
         print(f"Error: {err}")
 
@@ -168,6 +169,7 @@ def video_feed():
 
 @app.route('/user/showresult')
 def get_records_from_today():
+    mydb = mysql.connection.cursor()
     query = """
      SELECT 
         user.Name, 
