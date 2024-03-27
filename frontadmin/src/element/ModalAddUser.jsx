@@ -25,11 +25,13 @@ function ModalAddUser({ onClose, action }) {
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // console.log(imgRef);
         setCanvasPreview(
             imgRef.current,
             previewCanvasRef.current,
             convertToPixelCrop(crop, imgRef.current.width, imgRef.current.height)
         )
+        console.log(imgRef.current);
         if (!previewCanvasRef.current) {
             console.error("No canvas reference");
             return;
@@ -56,6 +58,7 @@ function ModalAddUser({ onClose, action }) {
         const file = e.target.files?.[0]
         if (!file) return;
         const reader = new FileReader();
+        console.log("EIEI");
         reader.addEventListener("load", () => {
             const imageElement = new Image();
             const imageUrl = reader.result?.toString() || "";
@@ -73,6 +76,7 @@ function ModalAddUser({ onClose, action }) {
         reader.readAsDataURL(file)
     }
     const onImageLoad = (e) => {
+        console.log("uu");
         if (!imgRef.current) return;
         const { width, height } = e.currentTarget;
         const cropWidthInPercent = (MIN_DIMENSION / width) * 100
