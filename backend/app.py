@@ -42,7 +42,7 @@ db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/data_set/us
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
 
 def sound(name, emotion):
-    url = "http://localhost:5000/speak"  # Removed leading space in URL
+    url = "http://localhost:5000/speak"  
     data = {"name": name, "emotion": emotion}
     response = requests.post(url, json=data)
     
