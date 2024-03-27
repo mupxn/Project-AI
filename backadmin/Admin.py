@@ -456,7 +456,6 @@ def insert_face():
     data = request.json
     mydb = mysql.connection.cursor()
 
-    # Assuming the correct column name is EmotionName, not EmoName.
     sql = ("INSERT INTO detection (UserID, TextID, Age, Gender, FaceDetect, BgDetect) "
             "VALUES (%s, (SELECT TextID FROM emotionaltext "
             "JOIN emotional ON emotionaltext.EmoID = emotional.EmoID "
@@ -479,9 +478,8 @@ def api_speak():
     data = request.json
     mydb = mysql.connection.cursor()
     emotion = data.get('emotion')
-    user_id = data.get('name')  # Assuming this is actually meant to be a UserID. If so, consider renaming in the request data structure as well.
+    user_id = data.get('name')  
     
-    # Ensure both emotion and user_id are strings before concatenating, especially if user_id is numeric.
     print(str(emotion) + str(user_id))  
     
     query = """
@@ -494,7 +492,7 @@ def api_speak():
     ORDER BY detection.DetectID DESC 
     LIMIT 1
     """
-    val = (emotion, user_id)  # Ensure that this matches your expectations and database schema.
+    val = (emotion, user_id)  
     
     mydb.execute(query, val)
     result = mydb.fetchone()  
