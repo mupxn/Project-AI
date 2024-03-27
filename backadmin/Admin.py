@@ -13,6 +13,7 @@ import numpy as np
 from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
 from MySQLdb import MySQLError
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -448,6 +449,102 @@ def process_image():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+# kiosk 
+    
+@app.route('/insert-face', methods=['POST'])
+def insert_face():
+    data = request.json
+    mydb = mysql.connection.cursor()
+
+    # Assuming the correct column name is EmotionName, not EmoName.
+    sql = ("INSERT INTO detection (UserID, TextID, Age, Gender, FaceDetect, BgDetect) "
+            "VALUES (%s, (SELECT TextID FROM emotionaltext "
+            "JOIN emotional ON emotionaltext.EmoID = emotional.EmoID "
+            "WHERE emotional.EmoName = %s ORDER BY RAND() LIMIT 1), %s, %s, %s, %s)")
+    val = (data['name'], data['emotion'], data['age'], data['gender'], data['face_image'], data['full_image'])
+
+    try:
+        mydb.execute(sql, val)
+        mysql.connection.commit()
+        return jsonify({"message": "Face inserted successfully"}), 200
+    except Exception as err:
+        print(f"Error: {err}")
+        return jsonify({"error": str(err)})
+
+
+    
+
+@app.route('/speak', methods=['POST'])
+def api_speak():
+    data = request.json
+    mydb = mysql.connection.cursor()
+    emotion = data.get('emotion')
+    user_id = data.get('name')  # Assuming this is actually meant to be a UserID. If so, consider renaming in the request data structure as well.
+    
+    # Ensure both emotion and user_id are strings before concatenating, especially if user_id is numeric.
+    print(str(emotion) + str(user_id))  
+    
+    query = """
+    SELECT emotionaltext.Text, user.Name 
+    FROM detection 
+    JOIN emotionaltext ON detection.TextID = emotionaltext.TextID 
+    JOIN emotional ON emotionaltext.EmoID = emotional.EmoID 
+    JOIN user ON detection.UserID = user.UserID
+    WHERE emotional.EmoName = %s AND detection.UserID = %s
+    ORDER BY detection.DetectID DESC 
+    LIMIT 1
+    """
+    val = (emotion, user_id)  # Ensure that this matches your expectations and database schema.
+    
+    mydb.execute(query, val)
+    result = mydb.fetchone()  
+
+    if result:
+        text_to_speak, user_name = result
+        print(text_to_speak)
+        return jsonify({"text_to_speak": text_to_speak, "user_name": user_name}), 200
+    else:
+        return jsonify({"message": "No records found."})
+    
+
+@app.route('/user/showresult')
+def get_records_from_today():
+    with app.app_context():
+        mydb = mysql.connection.cursor()
+        query = """
+        SELECT 
+            user.Name, 
+            detection.Gender, 
+            detection.Age, 
+            DATE(detection.DateTime) AS Date,
+            TIME(detection.DateTime) AS Time,
+            detection.FaceDetect,
+            emotional.EmoName
+        FROM 
+            detection 
+        JOIN 
+            user ON detection.UserID = user.UserID 
+        JOIN 
+            emotionaltext ON emotionaltext.TextID = detection.TextID 
+        JOIN 
+            emotional ON emotionaltext.EmoID = emotional.EmoID 
+        WHERE 
+            DATE(detection.DateTime) = CURDATE()
+        ORDER BY detection.DetectID DESC;
+        """
+        
+        try:
+            mydb.execute(query)
+            records = mydb.fetchall() 
+            
+            if not records:
+                return jsonify({"message": "No records found for today."}), 404
+            
+            formatted_records = [{"Name": record[0], "Gender": record[1], "Age": record[2], "Date": str(record[3]), "Time": str(record[4]), "FaceDetect": record[5], "EmoName": record[6]} for record in records]
+            
+            return jsonify(formatted_records)
+        except Exception as err:
+            print(f"Error: {err}")
 
 
 

@@ -17,7 +17,7 @@ const FaceDetect = () => {
 
   useEffect(() => {
     const fetchData = () => {
-      axios.get('http://localhost:5001/user/showresult')
+      axios.get('http://localhost:5000/user/showresult')
         .then(response => {
           setDetection(response.data); 
         })

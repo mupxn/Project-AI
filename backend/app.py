@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request
 from flask_cors import CORS
 import json
 import os
@@ -11,7 +11,9 @@ import base64
 import mysql.connector
 import pyttsx3
 import threading
-from flask_mysqldb import MySQL
+# from flask_mysqldb import MySQL
+import requests
+from PIL import Image
 
 
 app = Flask(__name__)
@@ -29,15 +31,6 @@ app.json_encoder = CustomJSONEncoder()
 
 camera = cv2.VideoCapture(0)  
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'project'
-
-mysql = MySQL(app)
-
-
-
 
 if not camera.isOpened():
     print("Error: Could not open camera.")
@@ -45,60 +38,30 @@ if not camera.isOpened():
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data_set/user")
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/data_set/user")
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
 
 def sound(name, emotion):
-    with app.app_context():
-        mydb = mysql.connection.cursor()
-        query = """
-        SELECT emotionaltext.Text, user.Name 
-        FROM detection 
-        JOIN emotionaltext ON detection.TextID = emotionaltext.TextID 
-        JOIN emotional ON emotionaltext.EmoID = emotional.EmoID 
-        JOIN user ON detection.UserID = user.UserID
-        WHERE emotional.EmoName = %s AND detection.UserID = %s
-        ORDER BY detection.DetectID DESC 
-        LIMIT 1
-        """
-        val = (emotion, name)  
-
-        mydb.execute(query, val)
-        result = mydb.fetchone()  
-
-        if result:
-            text_to_speak, user_name = result
-            engine = pyttsx3.init()
-            engine.setProperty('volume', 1) 
-            engine.setProperty('rate', 120) 
-            engine.setProperty('voice', TH_voice_id)
-            engine.say('คุณ' + user_name + ' ' + text_to_speak)
-            engine.runAndWait()
-        else:
-            print("No records found.")
-
+    url = "http://localhost:5000/speak"  # Removed leading space in URL
+    data = {"name": name, "emotion": emotion}
+    response = requests.post(url, json=data)
     
-
-
-
-
-def insert_face(name, emotion, age, gender, face_image, full_image):
-    with app.app_context():
-        mydb = mysql.connection.cursor()
-        face_image_base64 = base64.b64encode(cv2.imencode('.jpg', face_image)[1]).decode()
-        full_image_base64 = base64.b64encode(cv2.imencode('.jpg', full_image)[1]).decode()
-
-        sql = ("INSERT INTO detection (UserID, TextID, Age, Gender, FaceDetect, BgDetect) "
-            "VALUES (%s, (SELECT TextID FROM emotionaltext "
-            "JOIN emotional ON emotionaltext.EmoID = emotional.EmoID "
-            "WHERE emotional.EmoName = %s ORDER BY RAND() LIMIT 1), %s, %s, %s, %s)")
-        val = (name, emotion, age, gender, face_image_base64, full_image_base64)
-
-        try:
-            mydb.execute(sql, val)
-            mysql.connection.commit()
-        except Exception as err:
-            print(f"Error: {err}")
+    if response.status_code == 200:
+        response_data = response.json()
+        text_to_speak = response_data.get('text_to_speak')  
+        user_name = response_data.get('user_name') 
+        
+        
+        print(f"speak {user_name} {text_to_speak}") 
+        
+        engine = pyttsx3.init()
+        engine.setProperty('volume', 1)
+        engine.setProperty('rate', 120)
+        engine.setProperty('voice', TH_voice_id)
+        engine.say(f'คุณ {user_name} {text_to_speak}') 
+        engine.runAndWait()
+    else:
+        print("Failed to get response from API.")
 
 
 def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
@@ -117,7 +80,28 @@ def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
         else:
             name = 0
 
-        insert_face(name, emotion, age, gender, face_roi, img_flipped)
+        face_image_base64 = base64.b64encode(cv2.imencode('.jpg', face_roi)[1]).decode()
+        full_image_base64 = base64.b64encode(cv2.imencode('.jpg', img_flipped)[1]).decode()
+
+        api_url = ' http://localhost:5000/insert-face'
+        data = {
+            "name": name,
+            "emotion": emotion,
+            "age": age,
+            "gender": gender,
+            "face_image": face_image_base64,
+            "full_image": full_image_base64
+        }
+
+        response = requests.post(api_url, json=data)
+        
+        if response.status_code == 200:
+            print("Face inserted successfully")
+        else:
+            print("Failed to insert face")
+
+        print("name :" + name)
+
         sound(name,emotion)
 
         face_id = f"{x}-{y}-{w}-{h}"
@@ -168,50 +152,7 @@ def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen_frames(camera, db_path),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route('/user/showresult')
-def get_records_from_today():
-    with app.app_context():
-        mydb = mysql.connection.cursor()
-        query = """
-        SELECT 
-            user.Name, 
-            detection.Gender, 
-            detection.Age, 
-            DATE(detection.DateTime) AS Date,
-            TIME(detection.DateTime) AS Time,
-            detection.FaceDetect,
-            emotional.EmoName
-        FROM 
-            detection 
-        JOIN 
-            user ON detection.UserID = user.UserID 
-        JOIN 
-            emotionaltext ON emotionaltext.TextID = detection.TextID 
-        JOIN 
-            emotional ON emotionaltext.EmoID = emotional.EmoID 
-        WHERE 
-            DATE(detection.DateTime) = CURDATE()
-        ORDER BY detection.DetectID DESC;
-        """
-        
-        try:
-            mydb.execute(query)
-            records = mydb.fetchall() 
-            
-            if not records:
-                return jsonify({"message": "No records found for today."}), 404
-            
-            formatted_records = [{"Name": record[0], "Gender": record[1], "Age": record[2], "Date": str(record[3]), "Time": str(record[4]), "FaceDetect": record[5], "EmoName": record[6]} for record in records]
-            
-            return jsonify(formatted_records)
-        except Exception as err:
-            print(f"Error: {err}")
-            # return jsonify({"error": str(err)}), 500
     
-
-        
-        
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
