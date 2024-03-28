@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, Response, request
+from flask import Flask, jsonify, Response,request,send_from_directory
 from flask_cors import CORS
 import json
 import os
@@ -6,14 +6,14 @@ import cv2
 from deepface import DeepFace
 import os
 from datetime import timedelta
-import numpy as np 
 import base64
-import mysql.connector
 import pyttsx3
 import threading
 # from flask_mysqldb import MySQL
 import requests
-from PIL import Image
+import shutil
+from werkzeug.utils import secure_filename
+import os
 
 
 app = Flask(__name__)
@@ -40,6 +40,11 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 
 db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/data_set/user")
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
+
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/data_set/user")
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def sound(name, emotion):
     url = "http://localhost:5000/speak"  
@@ -152,6 +157,66 @@ def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen_frames(camera, db_path),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# admin
+@app.route('/user_images/<userid>/<filename>')
+def user_images(userid, filename):
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    image_path = os.path.join(base_path, "data_set", "user", str(userid))
+    print(image_path)
+    return send_from_directory(image_path, filename)
+
+
+@app.route('/api/delete-folder', methods=['POST'])
+def delete_folder():
+    data = request.get_json()  
+    folder_name = data.get('folder_name')
+
+    if not folder_name:
+        return jsonify({'error': 'Folder name is required'}), 400
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    folder_path = os.path.join(base_path, "data_set", "user", folder_name)
+    
+
+    if not os.path.exists(folder_path):
+        return jsonify({'error': 'Folder does not exist'}), 404
+
+    try:
+        shutil.rmtree(folder_path)
+        return jsonify({'message': 'Folder deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)})
+    
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    
+@app.route('/api/add-user/photo', methods=['POST'])
+def add_folder():
+   
+    if 'image' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['image']
+    userId = request.form.get('userId') 
+
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        user_folder = os.path.join(base_path, "data_set", "user", userId)
+
+        if not os.path.exists(user_folder):
+            os.makedirs(user_folder)
+
+        file_path = os.path.join(user_folder, filename)
+        file.save(file_path)
+
+        print("add" + file_path)
+        return jsonify({'message': f'File {filename} uploaded successfully to {user_folder}.'}), 200
+    else:
+        return jsonify({'error': 'File not allowed'}), 400
     
 
 if __name__ == '__main__':

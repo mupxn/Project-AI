@@ -68,11 +68,6 @@ def get_user():
     except MySQLError as err:
         print(f"Error: {err}")
 
-@app.route('/user_images/<userid>/<filename>')
-def user_images(userid,filename):
-    imagepath = os.path.join(os.getcwd(),"../data_set/user",str(userid))
-    print(imagepath)
-    return send_from_directory(imagepath ,filename)
 
 @app.route('/api/user/<string:search>')
 def get_user_search(search):
@@ -258,12 +253,29 @@ def update_name(userID):
 
 @app.route('/api/user/<int:userID>/delete', methods=['POST'])
 def delete_user(userID):
-    mydb = mysql.connection.cursor()
+    conn = mysql.connection
+    mydb = conn.cursor()
     try:
-        sql = ("DELETE FROM user WHERE user.UserID = %s;")
-        val = (userID,)
-        mydb.execute(sql,val)
+        conn.autocommit = False
+        update_sql = "UPDATE detection SET UserID = 0 WHERE UserID = %s"
+        mydb.execute(update_sql,(userID,))
+
+        delete_sql = ("DELETE FROM user WHERE user.UserID = %s;")
+        mydb.execute(delete_sql,(userID,))
         mysql.connection.commit()
+
+        try:
+            url = "http://localhost:5001/api/delete-folder"  
+            data = {"folder_name": str(userID)} 
+            response = requests.post(url, json=data)
+           
+            if response.status_code == 200:
+                print("Folder deleted successfully")
+            else:
+                print("Folder deletion failed:", response.json())
+        except requests.exceptions.RequestException as e:
+            print("Request to delete folder failed:", e)
+
         return jsonify({"message": "User deleted successfully"})
     except MySQLError as err:
         print(f"Error: {err}")
@@ -277,31 +289,36 @@ def add_user():
     mydb = mysql.connection.cursor()
     try:
         if 'image' not in request.files:
-            return 'No file part'
+            return jsonify({'error': 'No file part'}), 400
+        
         file = request.files['image']
         userId = request.form['userId']
         userName = request.form['userName']
-        if file.filename == '':
-            return 'No selected file'
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            user_folder = os.path.join(app.config['UPLOAD_FOLDER'], userId)
-            if not os.path.exists(user_folder):
-                os.makedirs(user_folder)
-            file_path = os.path.join(user_folder, filename)
-            file.save(file_path)
-            # return 'File successfully saved'
+        
 
-        sql = ("INSERT INTO user(user.UserID,user.Name) VALUES (%s,%s);")
-        val = (userId,userName)
-        # print("sql ;",image_file)
-        # # print("val ;",val)
-        mydb.execute(sql,val)
+        try:
+            url = "http://localhost:5001/api/add-user/photo"
+            files = {'image': (file.filename, file.stream, file.mimetype)}
+            data = {'userId': userId, 'userName': userName}
+            response = requests.post(url, files=files, data=data)
+            if response.ok:
+                external_api_message = 'File and data sent successfully.'
+            else:
+                external_api_message = 'Failed to send file and data to the external API.'
+        except Exception as e:
+            external_api_message = f'Error sending to external API: {str(e)}'
+
+        sql = "INSERT INTO user(UserID, Name) VALUES (%s, %s);"
+        val = (userId, userName)
+        mydb.execute(sql, val)
         mysql.connection.commit()
-        return jsonify({"message": "User deleted successfully"})
+
+        return jsonify({"message": "User added successfully", "external_api_message": external_api_message})
     except MySQLError as err:
-        print(f"Error: {err}")
-        return jsonify({"message": "error"})    
+        return jsonify({"error": f"SQL Error: {err}"})
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"})
+    
 
 @app.route('/api/home/barchart/<string:filter>')
 def get_data_barchart(filter):
@@ -383,20 +400,13 @@ def process_image():
         image_file = request.files['image']
         image_np = np.frombuffer(image_file.read(), np.uint8)
         uploaded_image = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+        uploaded_image = cv2.resize(uploaded_image, (224, 224), interpolation=cv2.INTER_AREA)
+        
         if uploaded_image is None:
             return jsonify({'error': 'Uploaded image is corrupt or in an unsupported format'}), 400
 
-        print(db_path)
-        results = DeepFace.find(uploaded_image, db_path=db_path, enforce_detection=False)
-        if results and not results[0].empty:
-            first_result_df = results[0]
-            most_similar_face_path = first_result_df.iloc[0]['identity']
-            most_similar_face_path = os.path.normpath(most_similar_face_path)
-            name = os.path.basename(os.path.dirname(most_similar_face_path))
-        else:
-            name = 0
-
-        query_results = []  # Initialize query_results list here
+        results = DeepFace.analyze(uploaded_image, actions=['gender'], enforce_detection=False)
+        gender = results[0]['dominant_gender'] 
 
         query = """
         SELECT detection.DetectID,
@@ -412,38 +422,34 @@ def process_image():
         JOIN user ON detection.UserID = user.UserID
         JOIN emotionaltext ON detection.TextID = emotionaltext.TextID
         JOIN emotional ON emotionaltext.EmoID = emotional.EmoID
-        WHERE detection.UserID = %s;
+        WHERE detection.Gender = %s;
         """
-        val = (name,)
+        val = (gender,)
         mydb.execute(query, val)
         records = mydb.fetchall()
 
-        if name != 0 :
-            query_results = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
-
-        else:
-            for record in records:
-                try:
-                    bg_image_data = base64.b64decode(record[7])
-                    bg_image = Image.open(BytesIO(bg_image_data))
-                    bg_image_cv = cv2.cvtColor(np.array(bg_image), cv2.COLOR_RGB2BGR)
-
-                    verification_result = DeepFace.verify(uploaded_image, bg_image_cv, enforce_detection=False,model_name = "Facenet512")
-                    if verification_result["verified"]:
-                        query_results.append({
-                                "ID": record[0],
-                                "Name": record[1],
-                                "Gender": record[2],
-                                "Age": record[3],
-                                "EmoName": record[4],
-                                "Date": str(record[5]),
-                                "Time": str(record[6]),
-                                "FaceDetect": record[7],
-                                "BGDetect": record[8]
-                        })
-                except Exception as e:
-                    print(f"Error processing record: {e}")
-                    continue
+        query_results = []
+        for record in records:
+            try:
+                bg_image_data = base64.b64decode(record[7])
+                bg_image = Image.open(BytesIO(bg_image_data))
+                bg_image_cv = cv2.cvtColor(np.array(bg_image), cv2.COLOR_RGB2BGR)
+                verification_result = DeepFace.verify(uploaded_image, bg_image_cv, enforce_detection=False, model_name="Facenet512")
+                if verification_result["verified"]:
+                    query_results.append({
+                        "ID": record[0],
+                        "Name": record[1],
+                        "Gender": record[2],
+                        "Age": record[3],
+                        "EmoName": record[4],
+                        "Date": str(record[5]),
+                        "Time": str(record[6]),
+                        "FaceDetect": record[7],
+                        "BGDetect": record[8]
+                    })
+            except Exception as e:
+                print(f"Error processing record: {e}")
+                continue
 
         return jsonify(query_results), 200
     except Exception as e:

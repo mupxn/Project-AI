@@ -111,7 +111,7 @@ function UserPage() {
           {users.map(user => (
             <div className='tr' key={user.UserID}>
               <div className="td id">{user.ID}</div>
-              <div className="td profile dropdown"><img src={`http://localhost:5000/user_images/${user.ID}/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
+              <div className="td profile dropdown"><img src={`http://localhost:5001/user_images/${user.ID}/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
               <div className="td name">{user.Name}</div>
               <div className="td edit">
                 <button className="edit-user" onClick={() => openModalEditUser(user.ID, user.Name)}><EditIcon /></button>
