@@ -1,0 +1,18 @@
+.modal-container-addimage{
+    position: fixed;
+    left: 200px;
+    top: 0;
+    width: calc(100% - 200px);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.modal-addimage{
+    background-color: white;
+    border-radius: 0.5rem;
+    text-align: center;
+    padding: 2rem;
+    width: 500px;
+}

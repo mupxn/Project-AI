@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import "./ModalDeleteUser.css"
 import CheckmarkIcon from "../icon/CheckmarkIcon"
 import axios from "axios";
 
 function ModalDeleteUser({ onClose, userId, userName, action }) {
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [deleteUser, setDeleteUser] = useState('');
     const Submitted = () => setIsSubmitted(true)
     function print() {
         console.log(userId);
     }
     const handleSubmit = async () => {
-        try {
-            await axios.post(`http://localhost:5000/api/user/${userId}/delete`);
-            action()
-            onClose()
-        } catch (error) {
+        Promise.all([
+            axios.post(`http://localhost:5000/api/user/${userId}/delete`),
+            axios.post(`http://localhost:5001/api/delete-folder/${userId}`)
+          ])
+          .then(() => {
+            action();
+            onClose();
+          })
+          .catch((error) => {
             console.error('Error fetching data:', error);
-        }
+          });
     }
     return (
         <div className='modal-container-delete'>

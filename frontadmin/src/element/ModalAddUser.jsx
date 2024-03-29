@@ -9,7 +9,6 @@ const MIN_DIMENSION = 100
 function ModalAddUser({ onClose, action }) {
 
     const [newUser, setnewUser] = useState('')
-    const [newId, setnewId] = useState('')
 
     const imgRef = useRef(null)
     const previewCanvasRef = useRef(null)
@@ -19,9 +18,6 @@ function ModalAddUser({ onClose, action }) {
 
     const handleInputName = (e) => {
         setnewUser(e.target.value)
-    }
-    const handleInputId = (e) => {
-        setnewId(e.target.value)
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,9 +34,9 @@ function ModalAddUser({ onClose, action }) {
         }
         const imageBlob = await new Promise(resolve => previewCanvasRef.current.toBlob(resolve, 'image/jpeg'));
         const formData = new FormData();
-        formData.append("userId", newId);
+        // formData.append("userId", newId);
         formData.append("userName", newUser);
-        formData.append("image", imageBlob, 'photo'+newId + '.jpg'); // Use userID as filename
+        formData.append("image", imageBlob,'.jpg'); // type of file is .jpg
         try {
             axios.post('http://localhost:5000/api/user/adduser', formData, {
                 headers: {
@@ -53,6 +49,7 @@ function ModalAddUser({ onClose, action }) {
         } catch {
             console.error('Error:', error)
         }
+        
     };
     const onSelectFile = (e) => {
         const file = e.target.files?.[0]
@@ -101,10 +98,10 @@ function ModalAddUser({ onClose, action }) {
                 <form onSubmit={handleSubmit}>
                     <div className="modal-content-adduser">
 
-                        <div className="input-wrap id">
+                        {/* <div className="input-wrap id">
                             <label>ID :</label>
                             <input type='number' onChange={handleInputId} required />
-                        </div>
+                        </div> */}
                         <div className="input-wrap name">
                             <label>ชื่อ :</label>
                             <input type='text' onChange={handleInputName} required />

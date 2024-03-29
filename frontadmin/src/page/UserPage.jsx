@@ -8,7 +8,8 @@ import EditIcon from '../icon/EditIcon'
 import DeleteIcon from '../icon/DeleteIcon';
 import axios from 'axios';
 import AdduserIcon from '../icon/AdduserIcon';
-
+import Addimageicon from '../icon/Addimageicon';
+import ModalAddImage from '../element/ModalAddImage';
 
 function UserPage() {
   const [users, setUsers] = useState([]) //map user from database
@@ -17,7 +18,15 @@ function UserPage() {
   const [isModalAddUser, setIsModalAddUser] = useState(false); //modal add user
   const [isModalDeleteUser, setIsModalDeleteUser] = useState(false) //modal delete
   const [isModalEditUser, setIsModalEditUser] = useState(false) //modal edit
+  const [isModalAddImage, setIsModalAddImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  // add image
+  const openModalAddImage = (userID, userName) => {
+    setIsModalAddImage(true)
+    setSelected(userID)
+    setSelectedName(userName)
+  }
+  const closeModalAddImage = () => setIsModalAddImage(false)
   //edit
   const openModalEditUser = (userID, userName) => {
     setIsModalEditUser(true)
@@ -100,9 +109,9 @@ function UserPage() {
       <div className="table-wrap">
         <div className="table-head">
           <div className="tr">
-            <div className="th id">ID</div>
             <div className="th profile">profile</div>
             <div className="th name">ชื่อ-นามสกุล</div>
+            <div className="th edit">เพิ่มรูป</div>
             <div className="th edit">แก้ไข</div>
             <div className="th delete">ลบ</div>
           </div>
@@ -110,9 +119,11 @@ function UserPage() {
         <div className="table-body">
           {users.map(user => (
             <div className='tr' key={user.UserID}>
-              <div className="td id">{user.ID}</div>
-              <div className="td profile dropdown"><img src={`http://localhost:5001/user_images/${user.ID}/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
+              <div className="td profile"><img src={`http://localhost:5001/user_images/${user.ID}/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
               <div className="td name">{user.Name}</div>
+              <div className="td addimage">
+                <button className="addimage-user" onClick={() => openModalAddImage(user.ID, user.Name)}><Addimageicon /></button>
+              </div>
               <div className="td edit">
                 <button className="edit-user" onClick={() => openModalEditUser(user.ID, user.Name)}><EditIcon /></button>
               </div>
@@ -134,6 +145,10 @@ function UserPage() {
 
       {isModalEditUser && (
         <ModalEditUser onClose={closeModalEditUser} userId={selected} userName={selectedName} action={handleUserAction} />
+      )}
+
+      {isModalAddImage && (
+        <ModalAddImage onClose={closeModalAddImage} userId={selected} action={handleUserAction} />
       )}
     </div >
   )

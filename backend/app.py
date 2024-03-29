@@ -14,6 +14,7 @@ import requests
 import shutil
 from werkzeug.utils import secure_filename
 import os
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -166,18 +167,15 @@ def user_images(userid, filename):
     print(image_path)
     return send_from_directory(image_path, filename)
 
-
-@app.route('/api/delete-folder', methods=['POST'])
-def delete_folder():
-    data = request.get_json()  
-    folder_name = data.get('folder_name')
+@app.route('/api/delete-folder/<userId>', methods=['POST'])
+def delete_folder(userId):
+    folder_name = userId
 
     if not folder_name:
         return jsonify({'error': 'Folder name is required'}), 400
     base_path = os.path.dirname(os.path.abspath(__file__))
     folder_path = os.path.join(base_path, "data_set", "user", folder_name)
     
-
     if not os.path.exists(folder_path):
         return jsonify({'error': 'Folder does not exist'}), 404
 
@@ -203,7 +201,8 @@ def add_folder():
         return jsonify({'error': 'No selected file'}), 400
 
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+        original_ext = file.filename.rsplit('.', 1)[1].lower()  # Extract the original file extension
+        filename = secure_filename(f'photo{userId}.{original_ext}')  # Securely format the new filename
         base_path = os.path.dirname(os.path.abspath(__file__))
         user_folder = os.path.join(base_path, "data_set", "user", userId)
 
@@ -218,6 +217,33 @@ def add_folder():
     else:
         return jsonify({'error': 'File not allowed'}), 400
     
+@app.route('/addanother/image',methods=['POST'])
+def add_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image file provided'}), 400
+    
+    file = request.files['image']
+    userId = request.form.get('userId')
+
+    # Ensure a userId is provided
+    if not userId:
+        return jsonify({'error': 'userId is required'}), 400
+    
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file and allowed_file(file.filename):
+        original_ext = file.filename.rsplit('.', 1)[1].lower()
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        filename = secure_filename(f'{userId}_{timestamp}.{original_ext}')
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        user_folder_path = os.path.join(base_path, "data_set", "user", userId)
+        if not os.path.exists(user_folder_path):
+            os.makedirs(user_folder_path)
+    file_path = os.path.join(user_folder_path, filename)
+    file.save(file_path)
+    print("file_path : ",file_path)
+    print("unique_filename : ",filename)
+    return jsonify({'message': 'Image uploaded successfully'}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

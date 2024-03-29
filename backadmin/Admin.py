@@ -18,7 +18,6 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
-
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, timedelta):
@@ -28,18 +27,11 @@ class CustomJSONEncoder(json.JSONEncoder):
         return super().default(obj)
 app.json_encoder = CustomJSONEncoder()
 
-UPLOAD_FOLDER = '../data_set/user'
+UPLOAD_FOLDER = '/data_set/user'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
-# connection = mysql.connector.connect(
-#   host="localhost",
-#   user="root",
-#   password="",
-#   database="project"
-# )
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
@@ -47,8 +39,88 @@ app.config['MYSQL_DB'] = 'project'
 
 mysql = MySQL(app)
 
-db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data_set/user")
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/data_set/user")
 
+# --------------------------------------------------- home ---------------------------------------------------
+# --------------- bar chart ---------------
+@app.route('/api/home/barchart/<string:filter>')
+def get_data_barchart(filter):
+    mydb = mysql.connection.cursor()
+    try:
+        sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE(detection.DateTime) = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
+        val = (filter,)
+        # print(val)
+        # print("sql ;",sql)
+        mydb.execute(sql,val)
+        records = mydb.fetchall()
+        categories = [record[0] for record in records]
+        series_data = [int(record[1]) for record in records]
+        data = {
+        "categories": categories,
+        "series": series_data
+    }
+        return jsonify(data)
+    except MySQLError as err:
+        print(f"Error: {err}")
+        return jsonify({"message": "error"})   
+# --------------- bar chart ---------------
+
+# --------------- pie chart ---------------
+@app.route('/api/home/piechart/<string:filter>')
+def get_data_piechart(filter):
+    mydb = mysql.connection.cursor()
+    try:
+        sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE_FORMAT(detection.DateTime, '%%Y-%%m') = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
+        val = (filter,)
+        # print("sql ;",sql)
+        mydb.execute(sql,val)
+        records = mydb.fetchall()
+        labels_data = [record[0] for record in records]
+        series_data = [int(record[1]) for record in records]
+        data = {
+        "series": series_data,
+        "labels": labels_data
+        }
+        return jsonify(data)
+    except MySQLError as err:
+        print(f"Error: {err}")
+        return jsonify({"message": "error"})
+# --------------- pie chart ---------------
+
+# --------------- line chart ---------------
+@app.route('/emotion_data', methods=['GET'])
+def emotion_data():
+    mydb = mysql.connection.cursor()
+    try:
+        query = """
+        SELECT 
+        emotional.EmoName, 
+        MONTH(detection.DateTime) AS Month, 
+        COUNT(*) AS EmotionCount
+        FROM 
+        emotional 
+        JOIN 
+        emotionaltext ON emotional.EmoID = emotionaltext.EmoID 
+        JOIN 
+        detection ON emotionaltext.TextID = detection.TextID 
+        GROUP BY 
+        emotional.EmoName, MONTH(detection.DateTime)
+        ORDER BY 
+        MONTH(detection.DateTime);
+        """
+        mydb.execute(query)
+        records = mydb.fetchall()
+        # print(records)
+        return jsonify(records)
+    except MySQLError as err:
+        print(f"Error: {err}")
+        return jsonify({"message": "error"})
+# --------------- line chart ---------------
+
+
+
+# --------------------------------------------------- user ---------------------------------------------------
+# --------------- show user ---------------
 @app.route('/api/user')
 def get_user():
     mydb = mysql.connection.cursor()
@@ -67,7 +139,6 @@ def get_user():
         return jsonify(formatted_records)
     except MySQLError as err:
         print(f"Error: {err}")
-
 
 @app.route('/api/user/<string:search>')
 def get_user_search(search):
@@ -92,7 +163,103 @@ def get_user_search(search):
     except MySQLError as err:
         print(f"Error: {err}")
         return jsonify({"error": str(err)})
-    
+# --------------- show user ---------------
+
+# --------------- user image ---------------   
+@app.route('/user_images/<userid>/<filename>')
+def user_images(userid,filename):
+    imagepath = os.path.join("data_set/user",str(userid))
+    # imagepath = os.path.join("/app/data_set/user", str(userid))
+    print(imagepath)
+    return send_from_directory(imagepath ,filename)
+# --------------- user imag ---------------
+
+# --------------- edit user ---------------
+@app.route('/api/user/<int:userID>/update', methods=['PUT'])
+def update_name(userID):
+    mydb = mysql.connection.cursor()
+    try:
+        new_name = request.json.get('name')
+        sql = ("UPDATE user SET user.Name = %s WHERE user.UserID = %s;")
+        val = (new_name,userID)
+        mydb.execute(sql, val)
+        mysql.connection.commit()
+        return jsonify({"message":"success"})
+    except MySQLError as err:
+        print(f"Error: {err}")
+# --------------- edit user ---------------
+
+# --------------- delete user ---------------
+@app.route('/api/user/<int:userID>/delete', methods=['POST'])
+def delete_user(userID):
+    conn = mysql.connection
+    mydb = conn.cursor()
+    try:
+        conn.autocommit = False
+        update_sql = "UPDATE detection SET UserID = 0 WHERE UserID = %s"
+        mydb.execute(update_sql,(userID,))
+
+        delete_sql = ("DELETE FROM user WHERE user.UserID = %s;")
+        mydb.execute(delete_sql,(userID,))
+        mysql.connection.commit()
+
+        # try:
+        #     url = "http://localhost:5001/api/delete-folder"  
+        #     data = {"folder_name": str(userID)} 
+        #     response = requests.post(url, json=data)
+           
+        #     if response.status_code == 200:
+        #         print("Folder deleted successfully")
+        #     else:
+        #         print("Folder deletion failed:", response.json())
+        # except requests.exceptions.RequestException as e:
+        #     print("Request to delete folder failed:", e)
+
+        return jsonify({"message": "User deleted successfully"})
+    except MySQLError as err:
+        print(f"Error: {err}")
+        return jsonify({"message": "error"})
+# --------------- delete user ---------------
+
+# --------------- add user ---------------
+@app.route('/api/user/adduser', methods=['POST'])
+def add_user():
+    mydb = mysql.connection.cursor()
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        
+        file = request.files['image']
+        userName = request.form['userName']
+
+        sql = "INSERT INTO user(Name) VALUES (%s);"
+        val = (userName,)
+        mydb.execute(sql, val)
+        mysql.connection.commit()
+        userId = mydb.lastrowid
+        try:
+            url = "http://localhost:5001/api/add-user/photo"
+            files = {'image': (file.filename, file.stream, file.mimetype)}
+            data = {'userId': userId, 'userName': userName}
+            response = requests.post(url, files=files, data=data)
+            if response.ok:
+                external_api_message = 'File and data sent successfully.'
+            else:
+                external_api_message = 'Failed to send file and data to the external API.'
+        except Exception as e:
+            external_api_message = f'Error sending to external API: {str(e)}'
+
+        return jsonify({"message": "User added successfully", "external_api_message": external_api_message})
+    except MySQLError as err:
+        return jsonify({"error": f"SQL Error: {err}"})
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"})
+# --------------- add user ---------------  
+
+
+
+# --------------------------------------------------- detection --------------------------------------------------- 
+# --------------- show detect user ---------------
 @app.route('/api/detect')
 def get_detection():
     mydb = mysql.connection.cursor()
@@ -183,21 +350,6 @@ def get_filterdate_search(filter, search):
         print(f"Error: {err}")
         return jsonify({"error": str(err)})
 
-
-@app.route('/api/detect/filter/month/<string:filter>/<string:search>')
-def get_filtermonth_search(filter,search):
-    mydb = mysql.connection.cursor()
-    try:
-        search_pattern = f"%{search}%"
-        val = (filter, search_pattern)
-        sql = ("SELECT detection.DetectID, user.Name, detection.Gender, detection.Age, emotional.EmoName, DATE(detection.DateTime) AS Date, TIME(detection.DateTime) AS Time, detection.FaceDetect, detection.BgDetect FROM detection JOIN user ON detection.UserID = user.UserID JOIN emotionaltext ON detection.TextID = emotionaltext.TextID JOIN emotional ON emotionaltext.EmoID = emotional.EmoID WHERE DATE_FORMAT(detection.DateTime, '%Y-%m') = %s AND user.Name LIKE %s;")
-        mydb.execute(sql,val)
-        records = mydb.fetchall() 
-        formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
-        return jsonify(formatted_records)
-    except MySQLError as err:
-        print(f"Error: {err}")
-
 @app.route('/api/detect/filter/month/<string:filter>')
 def get_filtermonth(filter):
     mydb = mysql.connection.cursor()
@@ -211,13 +363,13 @@ def get_filtermonth(filter):
     except MySQLError as err:
         print(f"Error: {err}")
 
-@app.route('/api/detect/filter/year/<string:filter>/<string:search>')
-def get_filteryear(filter,search):
+@app.route('/api/detect/filter/month/<string:filter>/<string:search>')
+def get_filtermonth_search(filter,search):
     mydb = mysql.connection.cursor()
     try:
         search_pattern = f"%{search}%"
         val = (filter, search_pattern)
-        sql = ("SELECT detection.DetectID, user.Name, detection.Gender, detection.Age, emotional.EmoName, DATE(detection.DateTime) AS Date, TIME(detection.DateTime) AS Time, detection.FaceDetect, detection.BgDetect FROM detection JOIN user ON detection.UserID = user.UserID JOIN emotionaltext ON detection.TextID = emotionaltext.TextID JOIN emotional ON emotionaltext.EmoID = emotional.EmoID WHERE DATE_FORMAT(detection.DateTime, '%Y') = %s AND user.Name LIKE %s;;")
+        sql = ("SELECT detection.DetectID, user.Name, detection.Gender, detection.Age, emotional.EmoName, DATE(detection.DateTime) AS Date, TIME(detection.DateTime) AS Time, detection.FaceDetect, detection.BgDetect FROM detection JOIN user ON detection.UserID = user.UserID JOIN emotionaltext ON detection.TextID = emotionaltext.TextID JOIN emotional ON emotionaltext.EmoID = emotional.EmoID WHERE DATE_FORMAT(detection.DateTime, '%Y-%m') = %s AND user.Name LIKE %s;")
         mydb.execute(sql,val)
         records = mydb.fetchall() 
         formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
@@ -238,158 +390,22 @@ def get_filteryear_search(filter):
     except MySQLError as err:
         print(f"Error: {err}")
 
-@app.route('/api/user/<int:userID>/update', methods=['PUT'])
-def update_name(userID):
+@app.route('/api/detect/filter/year/<string:filter>/<string:search>')
+def get_filteryear(filter,search):
     mydb = mysql.connection.cursor()
     try:
-        new_name = request.json.get('name')
-        sql = ("UPDATE user SET user.Name = %s WHERE user.UserID = %s;")
-        val = (new_name,userID)
-        mydb.execute(sql, val)
-        mysql.connection.commit()
-        return jsonify({"message":"success"})
-    except MySQLError as err:
-        print(f"Error: {err}")
-
-@app.route('/api/user/<int:userID>/delete', methods=['POST'])
-def delete_user(userID):
-    conn = mysql.connection
-    mydb = conn.cursor()
-    try:
-        conn.autocommit = False
-        update_sql = "UPDATE detection SET UserID = 0 WHERE UserID = %s"
-        mydb.execute(update_sql,(userID,))
-
-        delete_sql = ("DELETE FROM user WHERE user.UserID = %s;")
-        mydb.execute(delete_sql,(userID,))
-        mysql.connection.commit()
-
-        try:
-            url = "http://localhost:5001/api/delete-folder"  
-            data = {"folder_name": str(userID)} 
-            response = requests.post(url, json=data)
-           
-            if response.status_code == 200:
-                print("Folder deleted successfully")
-            else:
-                print("Folder deletion failed:", response.json())
-        except requests.exceptions.RequestException as e:
-            print("Request to delete folder failed:", e)
-
-        return jsonify({"message": "User deleted successfully"})
-    except MySQLError as err:
-        print(f"Error: {err}")
-        return jsonify({"message": "error"})
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@app.route('/api/user/adduser', methods=['POST'])
-def add_user():
-    mydb = mysql.connection.cursor()
-    try:
-        if 'image' not in request.files:
-            return jsonify({'error': 'No file part'}), 400
-        
-        file = request.files['image']
-        userId = request.form['userId']
-        userName = request.form['userName']
-        
-
-        try:
-            url = "http://localhost:5001/api/add-user/photo"
-            files = {'image': (file.filename, file.stream, file.mimetype)}
-            data = {'userId': userId, 'userName': userName}
-            response = requests.post(url, files=files, data=data)
-            if response.ok:
-                external_api_message = 'File and data sent successfully.'
-            else:
-                external_api_message = 'Failed to send file and data to the external API.'
-        except Exception as e:
-            external_api_message = f'Error sending to external API: {str(e)}'
-
-        sql = "INSERT INTO user(UserID, Name) VALUES (%s, %s);"
-        val = (userId, userName)
-        mydb.execute(sql, val)
-        mysql.connection.commit()
-
-        return jsonify({"message": "User added successfully", "external_api_message": external_api_message})
-    except MySQLError as err:
-        return jsonify({"error": f"SQL Error: {err}"})
-    except Exception as e:
-        return jsonify({"error": f"Unexpected error: {str(e)}"})
-    
-
-@app.route('/api/home/barchart/<string:filter>')
-def get_data_barchart(filter):
-    mydb = mysql.connection.cursor()
-    try:
-        sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE(detection.DateTime) = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
-        val = (filter,)
-        # print(val)
-        # print("sql ;",sql)
+        search_pattern = f"%{search}%"
+        val = (filter, search_pattern)
+        sql = ("SELECT detection.DetectID, user.Name, detection.Gender, detection.Age, emotional.EmoName, DATE(detection.DateTime) AS Date, TIME(detection.DateTime) AS Time, detection.FaceDetect, detection.BgDetect FROM detection JOIN user ON detection.UserID = user.UserID JOIN emotionaltext ON detection.TextID = emotionaltext.TextID JOIN emotional ON emotionaltext.EmoID = emotional.EmoID WHERE DATE_FORMAT(detection.DateTime, '%Y') = %s AND user.Name LIKE %s;;")
         mydb.execute(sql,val)
-        records = mydb.fetchall()
-        categories = [record[0] for record in records]
-        series_data = [int(record[1]) for record in records]
-        data = {
-        "categories": categories,
-        "series": series_data
-    }
-        return jsonify(data)
+        records = mydb.fetchall() 
+        formatted_records = [{"ID": record[0], "Name": record[1], "Gender": record[2], "Age": record[3], "EmoName": record[4], "Date": str(record[5]), "Time": str(record[6]), "FaceDetect": record[7], "BGDetect": record[8]} for record in records]
+        return jsonify(formatted_records)
     except MySQLError as err:
         print(f"Error: {err}")
-        return jsonify({"message": "error"})   
+# --------------- show detect user ---------------
 
-@app.route('/api/home/piechart/<string:filter>')
-def get_data_piechart(filter):
-    mydb = mysql.connection.cursor()
-    try:
-        sql = ("SELECT emotional.EmoName,COALESCE(SUM(CASE WHEN DATE_FORMAT(detection.DateTime, '%%Y-%%m') = %s THEN 1 ELSE 0 END), 0) AS detection_count FROM emotional LEFT JOIN emotionaltext ON emotional.EmoID = emotionaltext.EmoID LEFT JOIN detection ON emotionaltext.TextID = detection.TextID GROUP BY emotional.EmoName ORDER BY emotional.EmoID DESC;")
-        val = (filter,)
-        # print("sql ;",sql)
-        mydb.execute(sql,val)
-        records = mydb.fetchall()
-        labels_data = [record[0] for record in records]
-        series_data = [int(record[1]) for record in records]
-        data = {
-        "series": series_data,
-        "labels": labels_data
-        }
-        return jsonify(data)
-    except MySQLError as err:
-        print(f"Error: {err}")
-        return jsonify({"message": "error"})
-    
-@app.route('/emotion_data', methods=['GET'])
-def emotion_data():
-    mydb = mysql.connection.cursor()
-    try:
-        query = """
-        SELECT 
-        emotional.EmoName, 
-        MONTH(detection.DateTime) AS Month, 
-        COUNT(*) AS EmotionCount
-        FROM 
-        emotional 
-        JOIN 
-        emotionaltext ON emotional.EmoID = emotionaltext.EmoID 
-        JOIN 
-        detection ON emotionaltext.TextID = detection.TextID 
-        GROUP BY 
-        emotional.EmoName, MONTH(detection.DateTime)
-        ORDER BY 
-        MONTH(detection.DateTime);
-        """
-        mydb.execute(query)
-        records = mydb.fetchall()
-        # print(records)
-        return jsonify(records)
-    except MySQLError as err:
-        print(f"Error: {err}")
-        return jsonify({"message": "error"})
-
-
+# --------------- search from image ---------------
 @app.route('/api/admin/search', methods=['POST'])
 def process_image():
     mydb = mysql.connection.cursor()
@@ -454,6 +470,7 @@ def process_image():
         return jsonify(query_results), 200
     except Exception as e:
         return jsonify({'error': str(e)})
+# --------------- search from image ---------------
 
 # kiosk 
     
@@ -476,8 +493,6 @@ def insert_face():
         print(f"Error: {err}")
         return jsonify({"error": str(err)})
 
-
-    
 
 @app.route('/speak', methods=['POST'])
 def api_speak():
@@ -549,7 +564,6 @@ def get_records_from_today():
             return jsonify(formatted_records)
         except Exception as err:
             print(f"Error: {err}")
-
 
 
 if __name__ == '__main__':
