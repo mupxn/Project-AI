@@ -67,7 +67,7 @@ function ModalChooseImg({ onclose, onsearch, onImageData }) {
         }
     
         try {
-            const response = await axios.post('http://localhost:5000/api/admin/search', formData, {
+            const response = await axios.post(`${process.env.REACT_APP_WEB_PORT}/api/admin/search`, formData, {
                 headers: {
                     // When sending FormData, axios and the browser will automatically set the Content-Type to 'multipart/form-data'
                     // and include the proper boundary, so you don't manually set the Content-Type header when using FormData

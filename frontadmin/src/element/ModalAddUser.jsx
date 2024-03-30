@@ -38,7 +38,7 @@ function ModalAddUser({ onClose, action }) {
         formData.append("userName", newUser);
         formData.append("image", imageBlob,'.jpg'); // type of file is .jpg
         try {
-            axios.post('http://localhost:5000/api/user/adduser', formData, {
+            axios.post(`${process.env.REACT_APP_WEB_PORT}/api/user/adduser`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

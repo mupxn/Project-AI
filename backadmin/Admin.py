@@ -1,7 +1,7 @@
 import base64
 import os
 import cv2
-from flask import Flask, jsonify, Response,request,send_from_directory
+from flask import Flask, jsonify,request,send_from_directory
 from flask_cors import CORS
 import json
 import mysql.connector
@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
 from MySQLdb import MySQLError
 import requests
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
@@ -40,7 +41,8 @@ app.config['MYSQL_DB'] = 'project'
 mysql = MySQL(app)
 
 db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/data_set/user")
-
+load_dotenv()
+KIOSK_PORT = os.getenv("MY_KEY")
 # --------------------------------------------------- home ---------------------------------------------------
 # --------------- bar chart ---------------
 @app.route('/api/home/barchart/<string:filter>')
@@ -225,6 +227,7 @@ def delete_user(userID):
 @app.route('/api/user/adduser', methods=['POST'])
 def add_user():
     mydb = mysql.connection.cursor()
+    # print("key",KIOSK_PORT)
     try:
         if 'image' not in request.files:
             return jsonify({'error': 'No file part'}), 400
@@ -238,7 +241,7 @@ def add_user():
         mysql.connection.commit()
         userId = mydb.lastrowid
         try:
-            url = "http://localhost:5001/api/add-user/photo"
+            url = f"{KIOSK_PORT}/api/add-user/photo"
             files = {'image': (file.filename, file.stream, file.mimetype)}
             data = {'userId': userId, 'userName': userName}
             response = requests.post(url, files=files, data=data)
@@ -255,7 +258,6 @@ def add_user():
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"})
 # --------------- add user ---------------  
-
 
 
 # --------------------------------------------------- detection --------------------------------------------------- 

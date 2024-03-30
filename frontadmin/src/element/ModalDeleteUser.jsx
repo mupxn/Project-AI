@@ -11,8 +11,8 @@ function ModalDeleteUser({ onClose, userId, userName, action }) {
     }
     const handleSubmit = async () => {
         Promise.all([
-            axios.post(`http://localhost:5000/api/user/${userId}/delete`),
-            axios.post(`http://localhost:5001/api/delete-folder/${userId}`)
+            axios.post(`${process.env.REACT_APP_WEB_PORT}/api/user/${userId}/delete`),
+            axios.post(`${process.env.REACT_APP_KIOSK_PORT}/api/delete-folder/${userId}`)
           ])
           .then(() => {
             action();

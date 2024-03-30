@@ -66,7 +66,7 @@ function ModalAddImage({ userId, action, onClose }) {
         formData.append("userId", userId);
 
         try {
-            axios.post('http://localhost:5001/addanother/image', formData, {
+            axios.post(`${process.env.REACT_APP_KIOSK_PORT}/addanother/image`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

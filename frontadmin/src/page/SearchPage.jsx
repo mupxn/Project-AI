@@ -96,7 +96,7 @@ function SearchPage() {
   const fetchData = async (updatedFilter) => {
     if (hasClick == false && statusSearchPho == false) {
       if(searchQuery === ""){
-        await axios.get(`http://localhost:5000/api/detect`)
+        await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/detect`)
         .then(response => {
           setDetection(response.data);
           setApiError("null")
@@ -106,7 +106,7 @@ function SearchPage() {
           setApiError('No Data');
         });
       }else{
-        await axios.get(`http://localhost:5000/api/detect/${searchQuery}`)
+        await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/detect/${searchQuery}`)
         .then(response => {
           console.log('first', response.data)
           setDetection(response.data);
@@ -121,7 +121,7 @@ function SearchPage() {
     }
     else if (hasClick == true && selectedFilter === 'daily') {
         if(searchQuery === ""){
-          await axios.get(`http://localhost:5000/api/detect/filter/date/${updatedFilter}`)
+          await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/detect/filter/date/${updatedFilter}`)
         .then(response => {
           setFilterDateDetection(response.data)
         })
@@ -129,7 +129,7 @@ function SearchPage() {
           console.error('Error fetching data:', error);
         });
         }else if(searchQuery !== ""){
-          await axios.get(`http://localhost:5000/api/detect/filter/date/${date}/${searchQuery}`)
+          await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/detect/filter/date/${date}/${searchQuery}`)
         .then(response => {
           setFilterDateDetectionSearch(response.data)
         })
@@ -141,7 +141,7 @@ function SearchPage() {
     }
     else if (hasClick == true && selectedFilter === 'monthly') {
       if(searchQuery === ""){
-        await axios.get(`http://localhost:5000/api/detect/filter/month/${updatedFilter}`)
+        await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/detect/filter/month/${updatedFilter}`)
       .then(response => {
         if(fetchMonth === false){
           setFilterMonthDetection(response.data)
@@ -154,7 +154,7 @@ function SearchPage() {
         setApiError('No Data');
       });
       }else if(searchQuery !== ""){
-        await axios.get(`http://localhost:5000/api/detect/filter/month/${date}/${searchQuery}`)
+        await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/detect/filter/month/${date}/${searchQuery}`)
       .then(response => {
         setFilterMonthDetectionSearch(response.data)
         setApiError("null")
@@ -168,7 +168,7 @@ function SearchPage() {
     else if (hasClick == true && selectedFilter === 'yearly') {
         if(searchQuery === ""){
           if(fetchYear===false){
-            await axios.get(`http://localhost:5000/api/detect/filter/year/${updatedFilter}`)
+            await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/detect/filter/year/${updatedFilter}`)
         .then(response => {
           setFilterYearDetection(response.data)
         })
@@ -180,7 +180,7 @@ function SearchPage() {
           }
           
         }else if(searchQuery !== ""){
-          await axios.get(`http://localhost:5000/api/detect/filter/year/${date}/${searchQuery}`)
+          await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/detect/filter/year/${date}/${searchQuery}`)
         .then(response => {
           setFilterYearDetectionSearch(response.data)
           setApiError("null")

@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import './HomePage.css'
-import BarChart from "../element/BarChart.jsx";
-import PieChart from "../element/PieChart.jsx";
-import LineChart from "../element/LineChart.jsx";
 import axios from "axios";
 // import ChartComponent from "./ChartComponent.css"
 import ApexCharts from 'react-apexcharts';
 
 function HomePage() {
+  // const BASE_URL = process.env.WEB_PORT;
   const today = new Date()
   const maxDateValue = today.toISOString().split('T')[0];
   const maxMonthValue = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`;
@@ -45,7 +43,7 @@ function HomePage() {
   });
   const barData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/home/barchart/${filterDate}`);
+      const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/home/barchart/${filterDate}`);
       const { categories, series } = response.data;
       // console.log(categories);
       // console.log(series);
@@ -72,10 +70,10 @@ function HomePage() {
   };
   const barDataCurrentDate = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/home/barchart/${currentDate}`);
+      const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/home/barchart/${currentDate}`);
       const { categories, series } = response.data;
       // console.log(categories);
-      // console.log(series);
+      // console.log(BASE_URL);
       if (categories && series) {
         setChartDataBar({
           options: {
@@ -124,7 +122,7 @@ function HomePage() {
   });
   const pieData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/home/piechart/${filterMonth}`);
+      const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/home/piechart/${filterMonth}`);
       const { series, labels } = response.data;
       console.log(labels)
       console.log(series)
@@ -145,7 +143,7 @@ function HomePage() {
   };
   const pieDataCurrentDate = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/home/piechart/${currentMonth}`);
+      const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/home/piechart/${currentMonth}`);
       const { series, labels } = response.data;
       if (labels && series) {
         setChartDataPie({
@@ -185,7 +183,7 @@ function HomePage() {
   });
   const showDataYear = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/emotion_data');
+      const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/emotion_data`);
       const transformData = transformDataForLineChart(response.data)
       setChartDataLine(prevState => ({
         ...prevState,
@@ -230,13 +228,19 @@ function HomePage() {
     // barDataCurrentDate()
     // pieDataCurrentDate()
   }, [filterMonth,filterDate]);
+  const print =()=>{
+    const porttest = process.env.REACT_APP_WEB_PORT;
+    console.log(porttest);
+  }
   return (
     <div className="Home">
       <div className="head-home">HomePage</div>
+      
       <div className="chart">
         <div className="s-chart">
         
           <div className="bar-chart">
+          <button onClick={print}> hello</button>
           <input type='date' max={maxDate} onChange={handleFilterDate}></input>
             <ApexCharts
               options={chartDataBar.options}

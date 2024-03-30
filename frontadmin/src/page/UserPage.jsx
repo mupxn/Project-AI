@@ -58,10 +58,10 @@ function UserPage() {
   const fetchData = async () => {
     try {
       if (searchQuery === '') {
-        const response = await axios.get('http://localhost:5000/api/user');
+        const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/user`);
         setUsers(response.data);
       } else {
-        const response = await axios.get(`http://localhost:5000/api/user/${searchQuery}`);
+        const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/user/${searchQuery}`);
         setUsers(response.data);
       }
     } catch (error) {
@@ -119,7 +119,7 @@ function UserPage() {
         <div className="table-body">
           {users.map(user => (
             <div className='tr' key={user.UserID}>
-              <div className="td profile"><img src={`http://localhost:5001/user_images/${user.ID}/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
+              <div className="td profile"><img src={`${process.env.REACT_APP_KIOSK_PORT}/user_images/${user.ID}/photo${user.ID}.jpg`} style={{ width: "40px", height: "40px" }} /></div>
               <div className="td name">{user.Name}</div>
               <div className="td addimage">
                 <button className="addimage-user" onClick={() => openModalAddImage(user.ID, user.Name)}><Addimageicon /></button>

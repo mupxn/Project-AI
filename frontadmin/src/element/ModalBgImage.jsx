@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './ModalBgImage.css'
 import CloseIcon from '../icon/CloseIcon'
-import axios from "axios";
-import img from '../img/testimg.jpeg'
 function ModalBgImage({ onclose, DetectBG }) {
     
     return (

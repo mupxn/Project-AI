@@ -12,7 +12,7 @@ function ModalEditUser({ onClose, userId, userName, action }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(name);
-        await axios.put(`http://localhost:5000/api/user/${userId}/update`, { name })
+        await axios.put(`${process.env.REACT_APP_WEB_PORT}/api/user/${userId}/update`, { name })
             .then(response => {
                 setName(response.data);
                 action();
