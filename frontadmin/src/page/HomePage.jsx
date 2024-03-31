@@ -45,8 +45,8 @@ function HomePage() {
     try {
       const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/home/barchart/${filterDate}`);
       const { categories, series } = response.data;
-      // console.log(categories);
-      // console.log(series);
+      console.log(categories);
+      console.log(series);
       if (categories && series) {
         setChartDataBar({
           options: {
@@ -62,7 +62,7 @@ function HomePage() {
           }]
         });
       } else {
-        console.error('Categories or Series are undefined');
+        console.error('barData are undefined');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -72,8 +72,8 @@ function HomePage() {
     try {
       const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/home/barchart/${currentDate}`);
       const { categories, series } = response.data;
-      // console.log(categories);
-      // console.log(BASE_URL);
+      console.log(categories);
+      console.log(series);
       if (categories && series) {
         setChartDataBar({
           options: {
@@ -89,7 +89,7 @@ function HomePage() {
           }]
         });
       } else {
-        console.error('Categories or Series are undefined');
+        console.error('barDataCurrentDate are undefined');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -135,7 +135,7 @@ function HomePage() {
           },
         });
       } else {
-        console.error('Categories or Series are undefined');
+        console.error('pieData are undefined');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -145,6 +145,8 @@ function HomePage() {
     try {
       const response = await axios.get(`${process.env.REACT_APP_WEB_PORT}/api/home/piechart/${currentMonth}`);
       const { series, labels } = response.data;
+      console.log(labels)
+      console.log(series)
       if (labels && series) {
         setChartDataPie({
           series: series,
@@ -154,7 +156,7 @@ function HomePage() {
           },
         });
       } else {
-        console.error('series or labels are undefined');
+        console.error('pieDataCurrentDate are undefined');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -216,13 +218,13 @@ function HomePage() {
     if (clickDate==false) {
       barDataCurrentDate()
     }
-    else {
+    else if(clickDate==true) {
       barData()
     }
     if (clickMonth==false) {
       pieDataCurrentDate()
     }
-    else {
+    else if(clickMonth==true) {
       pieData()
     }
     // barDataCurrentDate()
