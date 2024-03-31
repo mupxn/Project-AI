@@ -240,7 +240,6 @@ function HomePage() {
         <div className="s-chart">
         
           <div className="bar-chart">
-          <button onClick={print}> hello</button>
           <input type='date' max={maxDate} onChange={handleFilterDate}></input>
             <ApexCharts
               options={chartDataBar.options}

@@ -1,26 +1,48 @@
 version: '3.8'
 
 services:
-  frontend:
-    build: ./frontend
-    container_name: frontend-noey
-    image: frontend-noey
+  frontend-admin:
+    build: ./frontadmin
+    container_name: frontend-admin
+    image: frontend-admin
     ports:
-      - "4999:4999"
+      - "3000:3000"
     depends_on:
-      - backend
+      - backend-admin
+   
 
-  backend:
-    build: ./backend
-    container_name: backend-noey
-    image: backend-noey
+  backend-admin:
+    build: ./backadmin
+    container_name: backend-admin
+    image: backend-admin
     ports:
       - "5000:5000"
     depends_on:
       - db
+    environment:
+      DATABASE_URL: "mysql://user:password@db/project"
+   
+    
+  frontend-kiosk:
+    build: ./project
+    container_name: frontend-kiosk
+    image: frontend-kiosk
+    ports:
+      - "3001:3001"
+  
+
+  backend-kisosk:
+    build: ./backend
+    container_name: backend-kiosk
+    image: backend-kiosk
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_URL: "mysql://user:password@db/project"
+  
 
   db:
-    container_name: mysql-noey
+    container_name: mysql
     image: mysql
     environment:
       MYSQL_DATABASE: 'project'
@@ -33,7 +55,7 @@ services:
       - db-data:/var/lib/mysql
 
   phpmyadmin:
-    container_name: phpmyadmin-noey
+    container_name: phpmyadmin
     image: phpmyadmin/phpmyadmin
     restart: always
     environment:
@@ -46,3 +68,6 @@ services:
 
 volumes:
   db-data: {}
+
+
+

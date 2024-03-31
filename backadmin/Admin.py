@@ -33,9 +33,9 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_HOST'] = 'db'  # or 'mysql-container-name' if on the same Docker network
+app.config['MYSQL_USER'] = 'user'
+app.config['MYSQL_PASSWORD'] = 'password'
 app.config['MYSQL_DB'] = 'project'
 
 mysql = MySQL(app)
@@ -530,7 +530,7 @@ def api_speak():
 
 @app.route('/user/showresult')
 def get_records_from_today():
-    with app.app_context():
+    try:
         mydb = mysql.connection.cursor()
         query = """
         SELECT 
@@ -553,19 +553,18 @@ def get_records_from_today():
             DATE(detection.DateTime) = CURDATE()
         ORDER BY detection.DetectID DESC;
         """
+        mydb.execute(query)
+        records = mydb.fetchall()
         
-        try:
-            mydb.execute(query)
-            records = mydb.fetchall() 
-            
-            if not records:
-                return jsonify({"message": "No records found for today."}), 404
-            
-            formatted_records = [{"Name": record[0], "Gender": record[1], "Age": record[2], "Date": str(record[3]), "Time": str(record[4]), "FaceDetect": record[5], "EmoName": record[6]} for record in records]
-            
-            return jsonify(formatted_records)
-        except Exception as err:
-            print(f"Error: {err}")
+        if not records:
+            return jsonify({"message": "No records found for today."}), 404
+
+        formatted_records = [{"Name": record[0], "Gender": record[1], "Age": record[2], "Date": str(record[3]), "Time": str(record[4]), "FaceDetect": record[5], "EmoName": record[6]} for record in records]
+        return jsonify(formatted_records)
+    except Exception as e:
+        print(f"Error fetching records: {e}")
+        return jsonify({"error": "Could not fetch records"}), 500
+
 
 
 if __name__ == '__main__':

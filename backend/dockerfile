@@ -1,11 +1,17 @@
 FROM python:3.10
 WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+COPY ../TTS_THAI.reg .
 COPY . .
+RUN mkdir -p /path/to/app/data_set/user
+ENV NAME data_set
 EXPOSE 5001
 CMD ["python", "app.py"]
 

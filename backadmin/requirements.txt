@@ -8,3 +8,5 @@ mysql-connector-python==8.3.0
 opencv-contrib-python==4.9.0.80
 pyttsx3==2.90
 Werkzeug==3.0.1
+Flask-MySQLdb==2.0.0
+python-dotenv==1.0.1
