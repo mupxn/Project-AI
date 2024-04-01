@@ -39,10 +39,10 @@ if not camera.isOpened():
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/data_set/user")
 TH_voice_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_THAI"
 
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_set/user")
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/data_set/user")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER

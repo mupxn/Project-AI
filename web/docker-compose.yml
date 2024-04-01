@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontadmin
+    container_name: frontend-web
+    image: frontend-web
+    ports:
+      - "4999:4999"
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backadmin
+    container_name: backend-web
+    image: backend-web
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+  db:
+    container_name: mysql-web
+    image: mysql
+    environment:
+      MYSQL_DATABASE: 'project'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'rootpassword'
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  phpmyadmin:
+    container_name: phpmyadmin-noey
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_ARBITRARY: 1  # Enable to connect to arbitrary server
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+
+volumes:
+  db-data: {}
