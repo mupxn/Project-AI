@@ -1,17 +1,23 @@
-FROM node:16
+# Use an official Node runtime as a parent image
+FROM node:14
 
-WORKDIR /app
+# Set the working directory in the container
+WORKDIR /Admin-Frontend
 
-COPY package*.json ./
-
+# Copy package.json and install dependencies
+COPY package.json ./
+COPY package-lock.json ./
 RUN npm install
 
-COPY . .
+# Bundle app source
+COPY . ./
 
+# Build the app
 RUN npm run build
 
+# Install serve and serve the build
 RUN npm install -g serve
+CMD ["serve", "-s", "build", "-l", "3000"]
 
-EXPOSE 4999
-
-CMD ["serve", "-s", "build", "-l", "4999"]
+# Make port 3000 available to the world outside this container
+EXPOSE 3000

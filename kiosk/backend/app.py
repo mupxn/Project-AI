@@ -30,12 +30,8 @@ class CustomJSONEncoder(json.JSONEncoder):
         return super().default(obj)
 app.json_encoder = CustomJSONEncoder()
 
-camera = cv2.VideoCapture(0)  
 
 
-if not camera.isOpened():
-    print("Error: Could not open camera.")
-    exit()
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -116,7 +112,7 @@ def analyze_face(face_roi, x, y, w, h, img_flipped, saved_faces, db_path):
     except Exception as e:
         print("Error in processing:", e)
 
-def gen_frames(camera, db_path):
+def gen_frames(camera, db_path):  
     trackers = []  
     saved_faces = set()  
 
@@ -155,6 +151,7 @@ def gen_frames(camera, db_path):
 
 @app.route('/video_feed')
 def video_feed():
+    camera = cv2.VideoCapture(cv2.CAP_V4L2)
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen_frames(camera, db_path),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
